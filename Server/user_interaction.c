@@ -1,14 +1,18 @@
 #include "server_header.h"
 
-bool login(char *ID, char *PW)                  // 서버에 로그인
+int login(char *ID, char *PW)                  // 서버에 로그인
 {
     if( /* user information is correct */ )
     {
         return true;
     }
-    else
+    else if( /* incorrcet user information */ )
     {
         return false;
+    }
+    else /* cannot found user id */
+    {
+        return SEARCH_ERROR;
     }
 }
 

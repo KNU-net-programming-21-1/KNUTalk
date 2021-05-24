@@ -5,8 +5,15 @@
     ******************************
 */
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <winSock2.h>
+#include "packet_header.h"
+
 #define MAX_SIZE 100
 #define ID_SIZE 21
+#define PW_SIZE 21
 #define MAX_ROOM_SIZE 100
 #define BUF_SIZE 100
 
@@ -18,24 +25,11 @@
 #define DATA_FAILURE    -OFFSET + 3
 #define DATA_DUPLICATE  -OFFSET + 4
 
-static const char *ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
-    "limit overflow",
-    "search error",
-    "function error",
-    "I/O failure",
-    "data duplicated"
-};
-
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <winSock2.h>
-
 typedef struct _member
 {
     SOCKET s;
     char id[ID_SIZE];  // 4 < strlen(id) < 20
-    char pw[ID_SIZE];  // 10 < strlen(pw) < 20
+    char pw[PW_SIZE];  // 10 < strlen(pw) < 20
     bool is_online;
     int room_list[MAX_ROOM_SIZE];
     int cur_room;
@@ -61,6 +55,23 @@ member registerd_users[MAX_SIZE];   // 등록된 모든 유저 리스트
 
 FILE* mem_list;                     // 유저 목록이 저장될 파일(서버 종료 시 저장 | 일정 시간 경과 후 주기적으로 백업)
 
+
+/*
+    #define OFFSET          10  // errno 개수에 따라 변경......
+    #define LIMIT_REACHED   -OFFSET
+    #define SEARCH_ERROR    -OFFSET + 1
+    #define FUNC_ERROR      -OFFSET + 2
+    #define DATA_FAILURE    -OFFSET + 3
+    #define DATA_DUPLICATE  -OFFSET + 4
+*/
+static const char *ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
+    "buffer overflow",
+    "search error",
+    "function error",
+    "I/O failure",
+    "data duplicated"
+};
+
 /* 데이터 베이스 관리 함수 | DB_management.c */
 
 int write_to_file(FILE *output, int type);               // DB 파일로 출력
@@ -85,7 +96,7 @@ int send_message(int room_number);                // 메시지 입력
 
 /* 서버에서 처리할 함수 | user_interaction.c */
 
-bool login(char *ID, char *PW);                  // 서버에 로그인
+int login(char *ID, char *PW);                  // 서버에 로그인
 int member_register(char *ID, char *PW);         // 서버에 계정 등록
 
 /* Thread | thread.c */

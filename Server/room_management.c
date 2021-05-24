@@ -77,7 +77,7 @@ int enter_member(room *target, member* new_member)            // 방에 인원 �
 }
 
 /*  현재 참가 중인 방에서 퇴장
-    room_list에서 cur_room이 아닌 방도 퇴장 가능하게 하려면 수정 필요
+    member.room_list에서 cur_room이 아닌 방도 퇴장 가능하게 하려면 수정 필요
     return value    0 - 정상 종료
 */
 int quit_room(member *exit_user)                        // 방 나가기
@@ -133,7 +133,7 @@ int current_room_num(void)                              // 현재 존재하는 �
     
     while(true)
     {
-        if(room_list[ret].num_of_mem != 0)
+        if( /* 방 탐색 조건 */ )
         {
             ret++;
         }
