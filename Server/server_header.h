@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <winSock2.h>
-#include "packet_header.h"
 
 #define MAX_SIZE 100
 #define ID_SIZE 21
