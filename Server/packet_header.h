@@ -1,6 +1,7 @@
 #include "server_header.h"
 
-/*  CS = client to server
+/*  
+    CS = client to server
     SC = server to client
 */
 
