@@ -24,6 +24,9 @@ int make_room(int id, char *name)                       // 방 생성 | room_lis
 
         // critical section
         
+
+
+
         // room_list에 추가 : list 구현 방법에 따라 변경 필요
         room_list[ret++] = *new;
         
