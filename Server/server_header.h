@@ -28,8 +28,8 @@
 
 typedef struct    // socket info
 {
-	SOCKET hClntSock;
-	SOCKADDR_IN clntAdr;
+    SOCKET hClntSock;
+    SOCKADDR_IN clntAdr;
     int user_index;
 } PER_HANDLE_DATA, *LPPER_HANDLE_DATA;
 
