@@ -24,11 +24,13 @@
 #define FUNC_ERROR      -OFFSET + 2
 #define DATA_FAILURE    -OFFSET + 3
 #define DATA_DUPLICATE  -OFFSET + 4
+#define IOCP_ERROR      -OFFSET + 5
 
 typedef struct    // socket info
 {
 	SOCKET hClntSock;
 	SOCKADDR_IN clntAdr;
+    int user_index;
 } PER_HANDLE_DATA, *LPPER_HANDLE_DATA;
 
 typedef struct    // buffer info
@@ -42,7 +44,6 @@ typedef struct    // buffer info
 typedef struct _member_info // 패킷 처리를 위한 구조체
 {
     SOCKET s;
-    int user_id;
     LPPER_IO_DATA exOver;   // IOCP buffer(overlapped 구조체 확장)
     char packet_buf[PACKET_SIZE];  // packet constructor buffer
     int prev_size;  // 이전에 받은 패킷의 크기
@@ -51,12 +52,13 @@ typedef struct _member_info // 패킷 처리를 위한 구조체
 typedef struct _member
 {
     member_info memberInfo;
+    int user_id;
     char id[ID_SIZE];  // 4 < strlen(id) < 20
     char pw[PW_SIZE];  // 10 < strlen(pw) < 20
     bool is_online;
     int room_list[MAX_ROOM_SIZE];
     int cur_room;
-    char block_list[MAX_SIZE];
+    int block_list[MAX_SIZE];
 } member;
 
 typedef struct _room
@@ -70,12 +72,11 @@ typedef struct _room
 
 //  DATA RACE BLOCK
 room room_list[MAX_ROOM_SIZE];      // 방 목록
-member online_users[MAX_SIZE];      // 접속중인 유저 리스트
-member registerd_users[MAX_SIZE];   // 등록된 모든 유저 리스트
+member online_users[MAX_SIZE];      // 접속중인 유저 리스트 -> 서버에 접속한 순서대로 인덱스에 채워넣음
+member registerd_users[MAX_SIZE];   // 등록된 모든 유저 리스트 -> 등록한 순서대로 인덱스와 같은 id 부여
 //  DATA RACE BLOCK
 
 FILE* mem_list;                     // 유저 목록이 저장될 파일(서버 종료 시 저장 | 일정 시간 경과 후 주기적으로 백업)
-
 
 /*
     #define OFFSET          10  // errno 개수에 따라 변경......
@@ -90,7 +91,8 @@ static const char *ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
     "search error",
     "function error",
     "I/O failure",
-    "data duplicated"
+    "data duplicated",
+    "IOCP error"
 };
 
 /* 데이터 베이스 관리 함수 | DB_management.c */
@@ -117,8 +119,15 @@ int send_message(int room_number);                // 메시지 입력
 
 /* 서버에서 처리할 함수 | user_interaction.c */
 
-int login(char *ID, char *PW);                  // 서버에 로그인
-int member_register(char *ID, char *PW);         // 서버에 계정 등록
+int login(int user_id, char *ID, char *PW);     // 서버에 로그인
+int logout(int user_id);                        // 서버에서 로그아웃
+int member_register(char *ID, char *PW);        // 서버에 계정 등록
+int search_user(char *id);                      // char id로 int user_id 검색
+
+/* 패킷 처리 함수 | packet_handler.c */
+
+void packet_construct(int user_id, int io_byte);    // IOCP 버퍼 내의 패킷 조립
+int packet_handler(int id, char *packet_buffer);    // 패킷의 타입에 따른 처리
 
 /* Thread | thread.c */
 

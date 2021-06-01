@@ -1,15 +1,14 @@
 #include "server_header.h"
 
-/*  int id와 char* name을 입력으로 받아 room*에 등록
+/*  int id와 char* name을 입력으로 받아 room_list에 등록
     최대 생성 가능한 방의 개수 체크
-    room*에 메모리 할당 및 정보 등록 -> room_list에 추가
     return value    ret - 추가된 방을 포함한 현재 존재하는 방의 개수
                     LIMIT_REACHED - 최대 생성 가능한 방의 개수에 도달했을 경우
 */
 int make_room(int id, char *name)                       // 방 생성 | room_list access (need mutex)
 {
     int ret;
-    room *new;
+    int i;
 
     if((ret = current_room_num()) == MAX_ROOM_SIZE)
     {
@@ -17,21 +16,16 @@ int make_room(int id, char *name)                       // 방 생성 | room_lis
     }
     else
     {
-        new = (room*)malloc(sizeof(room));
-        new->num_of_mem = 1;
-        new->room_id = id;
-        strcpy(new->room_name, name);
-
         // critical section
-        
 
-
-
-        // room_list에 추가 : list 구현 방법에 따라 변경 필요
-        room_list[ret++] = *new;
+        room_list[id].num_of_mem = 1;
+        strcpy(room_list[id].room_name, name);
+        for(i = 0; i < MAX_SIZE; i++)
+        {
+            room_list[id].member_list[i] = -1;
+        }
         
         // end of critical section
-
         return ret;
     }   
 }
@@ -44,14 +38,14 @@ int make_room(int id, char *name)                       // 방 생성 | room_lis
 */
 int enter_room(int id, member *new_member)              // 방 참가(enter_member wrapper function) | search_room(), enter_member() (need mutex)
 {
-    room *n;
-    if((n = search_room(id)) == NULL)
+    
+    if(room_list[id].room_name == NULL)
     {
         return error_handling(SEARCH_ERROR);
     }
     else
     {
-        return enter_member(n, new_member);
+        return enter_member(id, new_member);
     }
 }
 
@@ -59,19 +53,26 @@ int enter_room(int id, member *new_member)              // 방 참가(enter_memb
     return value    0 - 정상 종료
                     LIMIT_REACHED - 해당 방에 참가 가능한 최대 인원 수 초과
 */
-int enter_member(room *target, member* new_member)            // 방에 인원 추가 | member_list access (need mutex)
+int enter_member(int room_id, member* new_member)            // 방에 인원 추가 | member_list access (need mutex)
 {
-    if (target->num_of_mem == MAX_SIZE)
+    // critical section
+    
+    int member_count = room_list[room_id].num_of_mem;
+    
+    // end of critical section
+
+    if (member_count == MAX_SIZE)
     {
         return error_handling(LIMIT_REACHED);
     }
     else
     {
-        new_member->cur_room = target->room_id;
+        new_member->cur_room = room_id;
 
         // critical section
 
-        target->member_list[target->num_of_mem++] = *new_member;
+        room_list[room_id].member_list[member_count++] = new_member->user_id;
+        room_list[room_id].num_of_mem++;
 
         // end of critical section
         
@@ -85,13 +86,21 @@ int enter_member(room *target, member* new_member)            // 방에 인원 �
 */
 int quit_room(member *exit_user)                        // 방 나가기
 {
-    room *quit;
-    quit = search_room(exit_user->cur_room);
-    quit->num_of_mem--;
+    int i;
 
-    /*
-        room *quit->member_list에서 해당 유저 삭제 기능 추가 필요
-    */
+    for(i = 0; i < room_list[exit_user->cur_room].num_of_mem; i++)
+    {
+        if(room_list[exit_user->cur_room].member_list[i] == exit_user->user_id)
+        {
+            for(; i < room_list[exit_user->cur_room].num_of_mem; i++)
+            {
+                room_list[exit_user->cur_room].member_list[i] = room_list[exit_user->cur_room].member_list[i + 1];
+            }
+            break;
+        }
+    }
+
+    room_list[exit_user->cur_room].num_of_mem--;
 
     return 0;
 }
@@ -100,51 +109,40 @@ int quit_room(member *exit_user)                        // 방 나가기
 */
 int delete_room(int id)                                 // 방 삭제 | room_list access (need mutex)
 {
+    int i;
+
+    // critical section
+
+    strcpy(room_list[id].room_name, NULL);
+    for(i = 0; i < room_list[id].num_of_mem; i++)
+    {
+        room_list[id].member_list[i] = -1;
+    }
+    room_list[id].num_of_mem = 0;
+    
+    // end of critical section
+
     return 0;
 }
 
-/*  id를 받아 해당 방 구조체의 포인터를 반환
-    current_room_num으로 현재 존재하는 방의 개수 찾아와서 탐색
-    room_list의 구현 방법에 따라 탐색 알고리즘 수정 필요
-    return value    room - id에 해당하는 방 구조체 포인터
-                    NULL - 해당 방이 존재하지 않음
-*/
-room* search_room(int id)                               // room id로 방 검색 | room_list access (need mutex)
-{
-    int i, n;
-
-    n = current_room_num();
-
-    for (i = 0; i < n; i++)
-    {
-        if (room_list[i].room_id == id)
-        {
-            return &room_list[i];
-        }
-    }
-    
-    return NULL;
-}
-
 /*  현재 존재하는 방의 개수 탐색
-    방 삭제 및 room_list의 구현에 따라 실제로 구현방법 달라져야 할 필요성
     return value    ret - 존재하는 방의 개수
 */
 int current_room_num(void)                              // 현재 존재하는 방 개수 | room_list access (need mutex)
 {
-    int ret = 0;
-    
-    while(true)
+    int ret;
+
+    // critical section
+
+    for(ret = 0; ret < MAX_SIZE; ret++)
     {
-        if( /* 방 탐색 조건 */ )
+        if(room_list[ret].room_name == NULL)
         {
-            ret++;
-        }
-        else
-        {
-            break;
+            continue;
         }
     }
+
+    // end of critical section
 
     return ret;
 }
