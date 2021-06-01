@@ -14,7 +14,7 @@
 #define ID_SIZE 21
 #define PW_SIZE 21
 #define MAX_ROOM_SIZE 100
-#define BUF_SIZE 1024
+#define BUF_SIZE 100
 
 /* error codes */
 #define OFFSET          10  // errno 개수에 따라 변경......
