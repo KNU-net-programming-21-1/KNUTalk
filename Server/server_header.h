@@ -38,18 +38,24 @@ typedef struct    // buffer info
 	int rwMode;    // READ or WRITE
 } PER_IO_DATA, *LPPER_IO_DATA;
 
-typedef struct _member
+typedef struct _member_info // 패킷 처리를 위한 구조체
 {
     SOCKET s;
     int user_id;
+    LPPER_IO_DATA exOver;   // IOCP buffer(overlapped 구조체 확장)
+    char packet_buf[BUF_SIZE];  // packet constructor buffer
+    int prev_size;  // 이전에 받은 패킷의 크기
+} member_info;
+
+typedef struct _member
+{
+    member_info memberInfo;
     char id[ID_SIZE];  // 4 < strlen(id) < 20
     char pw[PW_SIZE];  // 10 < strlen(pw) < 20
     bool is_online;
     int room_list[MAX_ROOM_SIZE];
     int cur_room;
     char block_list[MAX_SIZE];
-    char msg_buf[BUF_SIZE];
-    int prev_size;  // 이전에 받은 패킷의 크기
 } member;
 
 typedef struct _room
