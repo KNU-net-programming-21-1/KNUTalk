@@ -15,6 +15,7 @@
 #define PW_SIZE 21
 #define MAX_ROOM_SIZE 100
 #define BUF_SIZE 100
+#define PACKET_SIZE 1024
 
 /* error codes */
 #define OFFSET          10  // errno 개수에 따라 변경......
@@ -43,7 +44,7 @@ typedef struct _member_info // 패킷 처리를 위한 구조체
     SOCKET s;
     int user_id;
     LPPER_IO_DATA exOver;   // IOCP buffer(overlapped 구조체 확장)
-    char packet_buf[BUF_SIZE];  // packet constructor buffer
+    char packet_buf[PACKET_SIZE];  // packet constructor buffer
     int prev_size;  // 이전에 받은 패킷의 크기
 } member_info;
 
