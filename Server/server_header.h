@@ -14,7 +14,7 @@
 #define ID_SIZE 21
 #define PW_SIZE 21
 #define MAX_ROOM_SIZE 100
-#define BUF_SIZE 100
+#define BUF_SIZE 1024
 
 /* error codes */
 #define OFFSET          10  // errno 개수에 따라 변경......
@@ -24,9 +24,24 @@
 #define DATA_FAILURE    -OFFSET + 3
 #define DATA_DUPLICATE  -OFFSET + 4
 
+typedef struct    // socket info
+{
+	SOCKET hClntSock;
+	SOCKADDR_IN clntAdr;
+} PER_HANDLE_DATA, *LPPER_HANDLE_DATA;
+
+typedef struct    // buffer info
+{
+	OVERLAPPED overlapped;
+	WSABUF wsaBuf;
+	char buffer[BUF_SIZE];
+	int rwMode;    // READ or WRITE
+} PER_IO_DATA, *LPPER_IO_DATA;
+
 typedef struct _member
 {
     SOCKET s;
+    int user_id;
     char id[ID_SIZE];  // 4 < strlen(id) < 20
     char pw[PW_SIZE];  // 10 < strlen(pw) < 20
     bool is_online;
@@ -34,20 +49,20 @@ typedef struct _member
     int cur_room;
     char block_list[MAX_SIZE];
     char msg_buf[BUF_SIZE];
+    int prev_size;  // 이전에 받은 패킷의 크기
 } member;
 
-typedef struct _room    // 방의 id도 구조체 내부에 넣을거면 굳이 room_list를 배열로 선언할 이유 없어보임
+typedef struct _room
 {
-    int room_id;
     char room_name[MAX_SIZE];
     int num_of_mem;
-    member member_list[MAX_SIZE];
+    int member_list[MAX_SIZE];
 } room;
 
 /* 서버가 유지할 데이터 */
 
 //  DATA RACE BLOCK
-room room_list[MAX_ROOM_SIZE];      // 방 목록(linked list로 구현?)
+room room_list[MAX_ROOM_SIZE];      // 방 목록
 member online_users[MAX_SIZE];      // 접속중인 유저 리스트
 member registerd_users[MAX_SIZE];   // 등록된 모든 유저 리스트
 //  DATA RACE BLOCK
