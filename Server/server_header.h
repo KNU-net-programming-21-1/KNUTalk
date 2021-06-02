@@ -35,10 +35,10 @@ typedef struct    // socket info
 
 typedef struct    // buffer info
 {
-	OVERLAPPED overlapped;
-	WSABUF wsaBuf;
-	char buffer[BUF_SIZE];
-	int rwMode;    // READ or WRITE
+    OVERLAPPED overlapped;
+    WSABUF wsaBuf;
+    char buffer[BUF_SIZE];
+    int rwMode;    // READ or WRITE
 } PER_IO_DATA, *LPPER_IO_DATA;
 
 typedef struct _member_info // 패킷 처리를 위한 구조체
