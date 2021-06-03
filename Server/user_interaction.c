@@ -31,6 +31,11 @@ int logout(int user_id)                         // 서버에서 로그아웃
     return 0;
 }
 
+/*	회원 가입 함수
+	create new member structure
+				&
+	add to member_list
+*/
 int member_register(char *ID, char *PW)         // 서버에 계정 등록
 {
      
@@ -38,18 +43,20 @@ int member_register(char *ID, char *PW)         // 서버에 계정 등록
     {
         return error_handling(DATA_DUPLICATE);
     }
-    else
+	else
     {
-         /*
-                create new member structure
-                    &
-                add to member_list
-         */
+		int ret_num = registerd_user();
+		member *new_user;
+		new_user = (member *)malloc(sizeof(member));
+		//memset
 
+		strcpy(new_user->id, ID);
+		strcpy(new_user->id, PW);
+		new_user->user_id = ret_num;
 
+		registerd_users[ret_num] = *new_user;
 
-
-        return 0;
+		return 0;
     }
 }
 
@@ -77,7 +84,18 @@ int registerd_user(void)
 */
 int search_user(char *id)                       // char id로 int user_id 검색
 {
-    int user_id;
+	int user_id = -1;
+	int ret_num = registerd_user();
+	int i;
+
+	for (i = 0; i < ret_num; i++)
+	{
+		if (!strcmp(registerd_users[i].id, id))
+		{
+			user_id = i;
+			break;
+		}
+	}
 
     return user_id;
 }
