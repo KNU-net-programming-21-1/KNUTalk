@@ -32,7 +32,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
             room_list[id].member_list[i] = -1;
         }
 
-        room_list[id].member_list[0] = user_id;
+        room_list[id].member_list[0] = online_users[user_id].user_id;
         
         // end of critical section
 
