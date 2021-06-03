@@ -7,10 +7,14 @@ int login(int user_id, char *ID, char *PW)                  // 서버에 로그�
 
     if(result >= 0)
     {
-        registerd_users[result].memberInfo = online_users[user_id].memberInfo;
-        registerd_users[result].is_online = true;
-        online_users[user_id] = registerd_users[result];
-        return 0;
+		if (!strcmp(registerd_users[result].pw, PW))			// 로그인 성공
+		{
+			registerd_users[result].memberInfo = online_users[user_id].memberInfo;
+			registerd_users[result].is_online = true;
+			online_users[user_id] = registerd_users[result];
+		}
+		else;													// 로그인 실패 -> error node 추가?
+		return 0;
     }
     else
     {
