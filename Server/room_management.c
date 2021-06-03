@@ -1,17 +1,24 @@
 #include "server_header.h"
+#include "packet_header.h"
 
-/*  int id와 char* name을 입력으로 받아 room_list에 등록
+/*  int user_id(방 생성 요청한 유저)와 char* name을 입력으로 받아 room_list에 등록
     최대 생성 가능한 방의 개수 체크
-    return value    ret - 추가된 방을 포함한 현재 존재하는 방의 개수
+    return value    id - 새로 생성된 방의 id
                     LIMIT_REACHED - 최대 생성 가능한 방의 개수에 도달했을 경우
 */
-int make_room(int id, char *name)                       // 방 생성 | room_list access (need mutex)
+int make_room(int user_id, char *name)                       // 방 생성 | room_list access (need mutex)
 {
-    int ret;
+    int id = find_empty_room();
     int i;
+    packet_complete packet;
+    
+    packet.size = sizeof(packet_complete);
+    packet.type = MAKEROOM;
 
-    if((ret = current_room_num()) == MAX_ROOM_SIZE)
+    if(id == MAX_ROOM_SIZE)
     {
+        packet.accept = false;
+        packet_send(user_id, &packet);
         return error_handling(LIMIT_REACHED);
     }
     else
@@ -24,58 +31,71 @@ int make_room(int id, char *name)                       // 방 생성 | room_lis
         {
             room_list[id].member_list[i] = -1;
         }
+
+        room_list[id].member_list[0] = user_id;
         
         // end of critical section
-        return ret;
+
+        packet.accept = true;
+        packet.room_id = id;
+        packet_send(user_id, &packet);
+
+        return id;
     }   
 }
 
-/*  방의 id와 참가를 원하는 client의 정보(new_member)를 받아 해당 방의 존재 여부 확인 및 enter_member에 인자 전달
-    enter_member function`s wrapper function
+/*  방의 id와 참가를 원하는 client의 id를 받아 방에 인원 참가 & 구성원에게 알림
     return value    0 - 정상 종료
                     SEARCH_ERROR - id에 해당하는 방이 존재하지 않음
                     LIMIT_REACHED  - 해당 방에 참가 가능한 최대 인원 수 초과
 */
-int enter_room(int id, member *new_member)              // 방 참가(enter_member wrapper function) | search_room(), enter_member() (need mutex)
+int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
 {
-    
-    if(room_list[id].room_name == NULL)
-    {
-        return error_handling(SEARCH_ERROR);
-    }
-    else
-    {
-        return enter_member(id, new_member);
-    }
-}
+    int member_count;
+    int i;
+    packet_join packet;
 
-/*  실제로 방에 인원을 추가
-    return value    0 - 정상 종료
-                    LIMIT_REACHED - 해당 방에 참가 가능한 최대 인원 수 초과
-*/
-int enter_member(int room_id, member* new_member)            // 방에 인원 추가 | member_list access (need mutex)
-{
+    packet.size = sizeof(packet_join);
+    packet.type = ENTER;
+    packet.room_id = room_id;
+
     // critical section
     
-    int member_count = room_list[room_id].num_of_mem;
+    member_count = room_list[room_id].num_of_mem;
     
     // end of critical section
 
-    if (member_count == MAX_SIZE)
+    if (member_count == -1)
     {
+        packet.accept = false;
+        packet_send(user_id, &packet);
+
+        return error_handling(SEARCH_ERROR);
+    }
+    else if(member_count == MAX_SIZE)
+    {
+        packet.accept = false;
+        packet_send(user_id, &packet);
+
         return error_handling(LIMIT_REACHED);
     }
     else
     {
-        new_member->cur_room = room_id;
-
         // critical section
 
-        room_list[room_id].member_list[member_count++] = new_member->user_id;
-        room_list[room_id].num_of_mem++;
+        room_list[room_id].member_list[member_count] = online_users[user_id].user_id;
+        room_list[room_id].num_of_mem++;        
+        strcpy(packet.user_name, online_users[user_id].id);
+        packet.accept = true;
+        packet.room_id = room_id;
+
+        for(i = 0; i < room_list[room_id].num_of_mem; i++)
+        {
+            packet_send(room_list[room_id].member_list[i], &packet);
+        }
 
         // end of critical section
-        
+
         return 0;
     }
 }
@@ -84,23 +104,24 @@ int enter_member(int room_id, member* new_member)            // 방에 인원 �
     member.room_list에서 cur_room이 아닌 방도 퇴장 가능하게 하려면 수정 필요
     return value    0 - 정상 종료
 */
-int quit_room(member *exit_user)                        // 방 나가기
+int quit_room(int user_id)                        // 방 나가기
 {
     int i;
+    int current = online_users[user_id].cur_room;
 
-    for(i = 0; i < room_list[exit_user->cur_room].num_of_mem; i++)
+    for(i = 0; i < room_list[current].num_of_mem; i++)
     {
-        if(room_list[exit_user->cur_room].member_list[i] == exit_user->user_id)
+        if(room_list[current].member_list[i] == online_users[user_id].user_id)
         {
-            for(; i < room_list[exit_user->cur_room].num_of_mem; i++)
+            for(; i < room_list[current].num_of_mem; i++)
             {
-                room_list[exit_user->cur_room].member_list[i] = room_list[exit_user->cur_room].member_list[i + 1];
+                room_list[current].member_list[i] = room_list[current].member_list[i + 1];
             }
+
+            room_list[current].num_of_mem--;
             break;
         }
     }
-
-    room_list[exit_user->cur_room].num_of_mem--;
 
     return 0;
 }
@@ -118,7 +139,7 @@ int delete_room(int id)                                 // 방 삭제 | room_lis
     {
         room_list[id].member_list[i] = -1;
     }
-    room_list[id].num_of_mem = 0;
+    room_list[id].num_of_mem = -1;
     
     // end of critical section
 
@@ -130,19 +151,39 @@ int delete_room(int id)                                 // 방 삭제 | room_lis
 */
 int current_room_num(void)                              // 현재 존재하는 방 개수 | room_list access (need mutex)
 {
-    int ret;
+    int i, ret;
 
     // critical section
 
-    for(ret = 0; ret < MAX_SIZE; ret++)
+    for(i = 0; i < MAX_SIZE; i++)
     {
-        if(room_list[ret].room_name == NULL)
+        if(room_list[i].num_of_mem != -1)
         {
-            continue;
+            ret++;
         }
     }
 
     // end of critical section
 
     return ret;
+}
+
+/*  room_list 배열에서 비어있는 방 탐색
+    return value    ret - 새로운 방 생성이 가능한 index
+                    MAX_ROOM_SIZE - 더이상 방 생성이 불가능 할때
+*/              
+
+int find_empty_room(void)
+{
+    int ret;
+
+    for(ret = 0; ret < MAX_ROOM_SIZE; ret++)
+    {
+        if(room_list[ret].num_of_mem == -1)
+        {
+            return ret;
+        }
+    }
+    
+    return MAX_ROOM_SIZE;
 }

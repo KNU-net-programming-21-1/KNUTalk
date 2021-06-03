@@ -1,9 +1,14 @@
 #include "server_header.h"
+#include "packet_header.h"
 #include <string.h>
 
 int login(int user_id, char *ID, char *PW)                  // 서버에 로그인
 {
     int result = search_user(ID);
+    packet_accept packet;
+
+    packet.size = sizeof(packet_accept);
+    packet.type = LOGIN;
 
     if(result >= 0)
     {
@@ -12,55 +17,82 @@ int login(int user_id, char *ID, char *PW)                  // 서버에 로그�
 			registerd_users[result].memberInfo = online_users[user_id].memberInfo;
 			registerd_users[result].is_online = true;
 			online_users[user_id] = registerd_users[result];
+
+            packet.accept = true;
 		}
-		else;													// 로그인 실패 -> error node 추가?
-		return 0;
+		else													// 로그인 실패 -> error node 추가?
+        {
+            packet.accept = false;
+        }
     }
     else
     {
-        return SEARCH_ERROR;
+        packet.accept = false;
     }
+    
+    packet_send(user_id, &packet);
+
+    return 0;
 }
 
 int logout(int user_id)                         // 서버에서 로그아웃
 {
-    int i;
+    packet_logout_accept packet;
+
     registerd_users[online_users[user_id].user_id].is_online = false;
-    
-    for(i = user_id; i < MAX_SIZE; i++)
-    {
-        online_users[i] = online_users[i + 1];
-    }
-    
+    online_users[user_id].user_id = -1;
+    packet.accept = true;
+    packet.size = sizeof(packet_logout_accept);
+    packet.type = LOGOUT;
+    packet_send(user_id, &packet);
+    closesocket(online_users[user_id].memberInfo.s);
+
     return 0;
 }
 
 /*	회원 가입 함수
-	create new member structure
-				&
-	add to member_list
+    registered_users[] 에 새 유저의 user_id, ID, Password 등록
+    return value    ret_num - 등록된 유저의 user_id(registered_users 배열 인덱스)
+                    DATA_DUPLICATE - ID 중복
+                    DATA_FAILURE - 잘못된 입력 양식
 */
-int member_register(char *ID, char *PW)         // 서버에 계정 등록
+int member_register(int user_id, char *ID, char *PW)         // 서버에 계정 등록
 {
-     
-    if (exist_user(ID))                   
+    int ret_num;
+    int id_len, pw_len;
+    packet_registered packet;
+
+    packet.size = sizeof(packet_registered);
+    packet.type = REGISTER;
+
+    id_len = strlen(ID);
+    pw_len = strlen(PW);
+
+    if(exist_user(ID))
     {
+        packet.accept = DATA_DUPLICATE;
+        packet_send(user_id, &packet);
         return error_handling(DATA_DUPLICATE);
     }
-	else
+	else if(id_len > 4 && id_len < 20 && pw_len > 10 && pw_len < 20)
     {
-		int ret_num = registerd_user();
-		member *new_user;
-		new_user = (member *)malloc(sizeof(member));
-		//memset
+		ret_num = registerd_user();
 
-		strcpy(new_user->id, ID);
-		strcpy(new_user->id, PW);
-		new_user->user_id = ret_num;
+		strcpy(registerd_users[ret_num].id, ID);
+		strcpy(registerd_users[ret_num].pw, PW);
+		registerd_users[ret_num].user_id = ret_num;
+        registerd_users[ret_num].is_online = false;     // 등록 성공할 경우 초기화면으로 돌아가 로그인 필요
 
-		registerd_users[ret_num] = *new_user;
+        packet.accept = true;
+        packet_send(user_id, &packet);
 
-		return 0;
+		return ret_num;
+    }
+    else
+    {
+        packet.accept = DATA_FAILURE;
+        packet_send(user_id, &packet);
+        return error_handling(DATA_FAILURE);
     }
 }
 

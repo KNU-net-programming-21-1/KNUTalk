@@ -16,6 +16,8 @@
 #define MAX_ROOM_SIZE 100
 #define BUF_SIZE 100
 #define PACKET_SIZE 1024
+#define READ	3
+#define	WRITE	5
 
 /* error codes */
 #define OFFSET          10  // errno 개수에 따라 변경......
@@ -58,6 +60,7 @@ typedef struct _member
     bool is_online;
     int room_list[MAX_ROOM_SIZE];
     int cur_room;
+    int blocked_user_num;
     int block_list[MAX_SIZE];
 } member;
 
@@ -72,19 +75,20 @@ typedef struct _room
 
 //  DATA RACE BLOCK
 room room_list[MAX_ROOM_SIZE];      // 방 목록
-member online_users[MAX_SIZE];      // 접속중인 유저 리스트 -> 서버에 접속한 순서대로 인덱스에 채워넣음
-member registerd_users[MAX_SIZE];   // 등록된 모든 유저 리스트 -> 등록한 순서대로 인덱스와 같은 id 부여
+member online_users[MAX_SIZE];      // 접속중인 유저 리스트 -> 서버에 접속한 순서대로 인덱스에 채워넣음 || 로그아웃 인원 생기면 그 자리 비우고 새 유저에게 그 공간 할당
+member registerd_users[MAX_SIZE];   // 등록된 모든 유저 리스트 -> 등록한 순서대로 인덱스와 같은 id 부여 || client와 연결 시 online_users 배열에 정보 입력하기 위한 저장공간
 //  DATA RACE BLOCK
 
 FILE* mem_list;                     // 유저 목록이 저장될 파일(서버 종료 시 저장 | 일정 시간 경과 후 주기적으로 백업)
 
 /*
-    #define OFFSET          10  // errno 개수에 따라 변경......
-    #define LIMIT_REACHED   -OFFSET
-    #define SEARCH_ERROR    -OFFSET + 1
-    #define FUNC_ERROR      -OFFSET + 2
-    #define DATA_FAILURE    -OFFSET + 3
-    #define DATA_DUPLICATE  -OFFSET + 4
+    OFFSET          10  // errno 개수에 따라 변경......
+    LIMIT_REACHED   -OFFSET
+    SEARCH_ERROR    -OFFSET + 1
+    FUNC_ERROR      -OFFSET + 2
+    DATA_FAILURE    -OFFSET + 3
+    DATA_DUPLICATE  -OFFSET + 4
+    IOCP_ERROR      -OFFSET + 5
 */
 static const char *ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
     "buffer overflow",
@@ -100,22 +104,21 @@ static const char *ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
 int write_to_file(FILE *output, int type);               // DB 파일로 출력
 int read_from_file(FILE *input, int type);               // DB 파일 읽어오기
 int make_chat_log(FILE *output, room *target);           // 채팅 내용 파일에 저장
-bool exist_user(char *id);                              // 유저 검색(계정 등록 위해 존재 유무 파악)
+bool exist_user(char *id);                               // 유저 검색(계정 등록 위해 존재 유무 파악)
 
 /* 방에 관련된 함수 | room_management.c */
 
 int make_room(int id, char *name);                  // 방 생성
-int enter_room(int id, member *new_member);         // 방 참가(enter_member wrapper function)
-int enter_member(room *target, member *new_member); // 방에 인원 추가
-int quit_room(member *exit_user);                   // 방 나가기
+int enter_room(int room_id, int user_id);           // 방 참가
+int quit_room(int user_id);                         // 방 나가기
 int delete_room(int id);                            // 방 삭제
-room* search_room(int id);                          // room id로 방 검색
 int current_room_num(void);                         // 현재 존재하는 방 개수
+int find_empty_room(void);                          // 방 생성이 가능한 room_id
 
 /* 채팅 기능 함수 | chat_processor.c */
 
-int add_block_list(char *user_name);              // 사용자 차단하기
-int send_message(int room_number);                // 메시지 입력
+int add_block_list(int user_id, char *user_name);                   // 사용자 차단하기
+int echo_message(int user_id, int room_number, char *message);      // 방 인원에게 user_id의 채팅내용 전송
 
 /* 서버에서 처리할 함수 | user_interaction.c */
 
@@ -128,6 +131,7 @@ int search_user(char *id);                      // char id로 int user_id 검색
 
 void packet_construct(int user_id, int io_byte);    // IOCP 버퍼 내의 패킷 조립
 int packet_handler(int id, char *packet_buffer);    // 패킷의 타입에 따른 처리
+int packet_send(int user_id, void *packet);         // 패킷 전송
 
 /* Thread | thread.c */
 

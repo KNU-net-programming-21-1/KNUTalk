@@ -1,7 +1,7 @@
 #include "server_header.h"
 #include "packet_header.h"
 
-void packet_construct(int user_id, int io_byte)
+void packet_construct(int user_id, int io_byte)     // 스레드간 동기화 문제 생각할 필요
 {
     int rest_byte = io_byte;
     char *p = online_users[user_id].memberInfo.exOver->buffer;
@@ -47,30 +47,57 @@ int packet_handler(int id, char *packet_buffer)
     switch (packet_buffer[1])
     {
     case REGISTER:
-        packet_register *packet = (packet_register* )packet_buffer;
+        packet_register *packet_1 = (packet_register* )packet_buffer;
+        member_register(packet_1->id, packet_1->pw);
         break;
     case LOGIN:
-        packet_login *packet = (packet_login* )packet_buffer;
+        packet_login *packet_2 = (packet_login* )packet_buffer;
+        login(id, packet_2->id, packet_2->pw);
         break;
     case LOGOUT:
-        packet_logout *packet = (packet_logout* )packet_buffer;
+        logout(id);
         break;
     case ENTER:
-        packet_enter *packet = (packet_enter* )packet_buffer;
-        break;
-    case CHAT:
-        packet_chat *packet = (packet_chat* )packet_buffer;
+        packet_enter *packet_3 = (packet_enter* )packet_buffer;
+        enter_room(packet_3->room_id, id);
         break;
     case LEAVE:
-        packet_quit *packet = (packet_quit* )packet_buffer;
+        quit_room(id);
+        break;
+    case CHAT:
+        packet_chat *packet_4 = (packet_chat* )packet_buffer;
+        echo_message(id, packet_4->room_id, packet_4->buf);
+        break;
+    case BLOCK:
+        packet_block *packet_5 = (packet_block* )packet_buffer;
+        add_block_list(id, packet_5->name);
+        break;
+    case MAKEROOM:
+        packet_makeroom *packet_6 = (packet_makeroom* )packet_buffer;
+        make_room(id, packet_6->name);
         break;
     }
     return 0;
 }
 
-int packet_send(void *packet)
+/*  client에게 packet 전송
+    user_id(online_users 배열 인덱스)로 소켓을 찾아 packet 전송
+    return value    buf[0] - 전송한 packet의 바이트 수
+*/
+int packet_send(int user_id, void *packet)
 {
-    int bytesTrans;
     
-    return bytesTrans;
+    char *buf = (char*)packet;
+    member *target = &online_users[user_id];
+    LPPER_IO_DATA new;
+
+    new = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
+    new->rwMode = WRITE;
+    new->wsaBuf.buf = new->buffer;
+    new->wsaBuf.len = buf[0];
+    memcpy(new->buffer, buf, buf[0]);
+
+    WSASend(target->memberInfo.s, &new->wsaBuf, 1, NULL, 0, &new->overlapped, NULL);
+
+    return buf[0];
 }

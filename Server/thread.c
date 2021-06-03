@@ -1,8 +1,6 @@
 #include "server_header.h"
 #include <process.h>
 #include <windows.h>
-#define READ	3
-#define	WRITE	5
 
 int accept_thread(int port)
 {
@@ -15,7 +13,7 @@ int accept_thread(int port)
 	SOCKET hServSock;
 	SOCKADDR_IN servAdr;
 	int recvBytes, i, flags=0;
-	int online_num = 0;
+	int empty_slot;						// online_users 배열의 빈 부분 탐색용
 
     /* WSA startup */
 	if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -62,22 +60,42 @@ int accept_thread(int port)
 		SOCKADDR_IN clntAdr;		
 		int addrLen = sizeof(clntAdr);
 		
-		hClntSock = accept(hServSock, (SOCKADDR*)&clntAdr, &addrLen);		  
+		hClntSock = accept(hServSock, (SOCKADDR*)&clntAdr, &addrLen);	
 
-		handleInfo = (LPPER_HANDLE_DATA)malloc(sizeof(PER_HANDLE_DATA));		
-		handleInfo->hClntSock = hClntSock;
-		memcpy(&(handleInfo->clntAdr), &clntAdr, addrLen);
-		handleInfo->user_index = online_num++;
+		for(i = 0; i < MAX_SIZE; i++)
+		{
+			empty_slot = LIMIT_REACHED;
+			if(online_users[i].user_id == -1)
+			{
+				empty_slot = i;	// online_users 배열의 비어있는 부분에 새 연결 할당
+				break;			// 최대 동접자 수 초과할 경우...일단 보류 -> 대기 알리는 패킷전송, 로그아웃으로 빈자리 생길경우 스레드에 알려주는 기능, 메인 스레드는 새 연결 계속 받아서 대기 패킷 전송 함수 호출해야 함
+			}
+		}
+		  
+		if(empty_slot == LIMIT_REACHED)
+		{
+			/* send limit reached error packet to client */
+			closesocket(hClntSock);
+		}
+		else
+		{
+			handleInfo = (LPPER_HANDLE_DATA)malloc(sizeof(PER_HANDLE_DATA));		
+			handleInfo->hClntSock = hClntSock;
+			memcpy(&(handleInfo->clntAdr), &clntAdr, addrLen);
+			handleInfo->user_index = empty_slot;
 
-		CreateIoCompletionPort((HANDLE)hClntSock, hComPort, (DWORD)handleInfo, 0);
-		
-		ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
-		memset(&(ioInfo->overlapped), 0, sizeof(OVERLAPPED));		
-		ioInfo->wsaBuf.len = BUF_SIZE;
-		ioInfo->wsaBuf.buf = ioInfo->buffer;
-		ioInfo->rwMode = READ;
-		
-		WSARecv(handleInfo->hClntSock,	&(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);	
+			CreateIoCompletionPort((HANDLE)hClntSock, hComPort, (DWORD)handleInfo, 0);
+			
+			ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
+			memset(&(ioInfo->overlapped), 0, sizeof(OVERLAPPED));		
+			ioInfo->wsaBuf.len = BUF_SIZE;
+			ioInfo->wsaBuf.buf = ioInfo->buffer;
+			ioInfo->rwMode = READ;
+			
+			online_users[empty_slot].memberInfo.exOver = ioInfo;
+			online_users[empty_slot].is_online = true;
+			WSARecv(handleInfo->hClntSock,	&(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);	
+		}
 	}
 	return 0;
 }
@@ -103,8 +121,8 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 				error_handling(IOCP_ERROR);
 			}
 
-			closesocket(handleInfo->hClntSock);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우 유저 로그아웃 처리
 			logout(handleInfo->user_index);
+			closesocket(handleInfo->hClntSock);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우 유저 로그아웃 처리
 			continue;
 		}
 
