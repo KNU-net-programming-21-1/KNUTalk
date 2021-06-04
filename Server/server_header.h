@@ -76,9 +76,11 @@ typedef struct _room
 //  DATA RACE BLOCK
 room room_list[MAX_ROOM_SIZE];      // 방 목록
 member online_users[MAX_SIZE];      // 접속중인 유저 리스트 -> 서버에 접속한 순서대로 인덱스에 채워넣음 || 로그아웃 인원 생기면 그 자리 비우고 새 유저에게 그 공간 할당
-member registerd_users[MAX_SIZE];   // 등록된 모든 유저 리스트 -> 등록한 순서대로 인덱스와 같은 id 부여 || client와 연결 시 online_users 배열에 정보 입력하기 위한 저장공간
+member registered_users[MAX_SIZE];   // 등록된 모든 유저 리스트 -> 등록한 순서대로 인덱스와 같은 id 부여 || client와 연결 시 online_users 배열에 정보 입력하기 위한 저장공간
 //  DATA RACE BLOCK
 
+// Mutex
+HANDLE hMutex;
 FILE* mem_list;                     // 유저 목록이 저장될 파일(서버 종료 시 저장 | 일정 시간 경과 후 주기적으로 백업)
 
 /*

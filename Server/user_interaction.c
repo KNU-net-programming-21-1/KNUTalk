@@ -78,10 +78,10 @@ int member_register(int user_id, char *ID, char *PW)         // 서버에 계정
     {
 		ret_num = registerd_user();
 
-		strcpy(registerd_users[ret_num].id, ID);
-		strcpy(registerd_users[ret_num].pw, PW);
-		registerd_users[ret_num].user_id = ret_num;
-        registerd_users[ret_num].is_online = false;     // 등록 성공할 경우 초기화면으로 돌아가 로그인 필요
+		strcpy(registered_users[ret_num].id, ID);
+		strcpy(registered_users[ret_num].pw, PW);
+		registered_users[ret_num].user_id = ret_num;
+        registered_users[ret_num].is_online = false;     // 등록 성공할 경우 초기화면으로 돌아가 로그인 필요
 
         packet.accept = true;
         packet_send(user_id, &packet);
@@ -105,7 +105,7 @@ int registerd_user(void)
 
     for(ret = 0; ret < MAX_SIZE; ret++)
     {
-        if(registerd_users[ret].user_id == -1)
+        if(registered_users[ret].user_id == -1)
         {
             break;
         }
@@ -126,7 +126,7 @@ int search_user(char *id)                       // char id로 int user_id 검색
 
 	for (i = 0; i < ret_num; i++)
 	{
-		if (!strcmp(registerd_users[i].id, id))
+		if (!strcmp(registered_users[i].id, id))
 		{
 			user_id = i;
 			break;
