@@ -4,7 +4,7 @@
     구조체 변수 , 함수 정의 헤더파일
     ******************************
 */
-#pragma once
+#pragma once                    // fix debug error
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -104,7 +104,6 @@ static const char *ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
 int write_to_file(FILE *output, int type);               // DB 파일로 출력
 void read_from_file();                                   // DB 파일 읽어오기 | 서버 가동시 최초 실행되어 registered_users 가져옴
 int make_chat_log(FILE *output, room *target);           // 채팅 내용 파일에 저장
-bool exist_user(char *id);                               // 유저 검색(계정 등록 위해 존재 유무 파악)
 
 /* 방에 관련된 함수 | room_management.c */
 
