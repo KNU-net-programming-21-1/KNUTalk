@@ -4,7 +4,7 @@
     구조체 변수 , 함수 정의 헤더파일
     ******************************
 */
-
+#pragma once
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

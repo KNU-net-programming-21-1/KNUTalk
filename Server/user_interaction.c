@@ -68,7 +68,7 @@ int member_register(int user_id, char *ID, char *PW)         // 서버에 계정
     id_len = strlen(ID);
     pw_len = strlen(PW);
 
-    if(exist_user(ID))
+    if(search_user(ID) != -1)
     {
         packet.accept = DATA_DUPLICATE;
         packet_send(user_id, &packet);
