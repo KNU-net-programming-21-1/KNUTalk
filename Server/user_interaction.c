@@ -12,11 +12,11 @@ int login(int user_id, char *ID, char *PW)                  // 서버에 로그�
 
     if(result >= 0)
     {
-		if (!strcmp(registerd_users[result].pw, PW))			// 로그인 성공
+		if (!strcmp(registered_users[result].pw, PW))			// 로그인 성공
 		{
-			registerd_users[result].memberInfo = online_users[user_id].memberInfo;
-			registerd_users[result].is_online = true;
-			online_users[user_id] = registerd_users[result];
+			registered_users[result].memberInfo = online_users[user_id].memberInfo;
+			registered_users[result].is_online = true;
+			online_users[user_id] = registered_users[result];
 
             packet.accept = true;
 		}
@@ -39,7 +39,7 @@ int logout(int user_id)                         // 서버에서 로그아웃
 {
     packet_logout_accept packet;
 
-    registerd_users[online_users[user_id].user_id].is_online = false;
+    registered_users[online_users[user_id].user_id].is_online = false;
     online_users[user_id].user_id = -1;
     packet.accept = true;
     packet.size = sizeof(packet_logout_accept);
