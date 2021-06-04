@@ -114,6 +114,8 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 	while(true)
 	{
 		GQCS = GetQueuedCompletionStatus(hComPort, &bytesTrans, (LPDWORD)&handleInfo, (LPOVERLAPPED)&ioInfo, INFINITE);
+		socket = handleInfo->hClntSock;
+
 		if(GQCS || bytesTrans == 0)
 		{
 			if(bytesTrans != 0)	
@@ -122,7 +124,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 			}
 
 			logout(handleInfo->user_index);
-			closesocket(handleInfo->hClntSock);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우 유저 로그아웃 처리
+			closesocket(socket);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우 유저 로그아웃 처리
 			continue;
 		}
 

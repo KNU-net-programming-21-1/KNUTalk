@@ -1,4 +1,5 @@
 #include "server_header.h"
+
 /*
     추가해야 할 패킷
         - 입장 가능한 방의 리스트 정보를 담은 패킷(S -> C)
@@ -180,7 +181,7 @@ typedef struct CS_packet_makeroom
 
 }packet_makeroom;
 
-typedef struct CS_packet_makeroom
+typedef struct CS_packet_complete	// 위에 구조체랑 재정의 오류 나서 임의로 이름 바꿨습니다!
 {
     char size;
     char type;

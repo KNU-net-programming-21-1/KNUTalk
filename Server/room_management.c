@@ -155,7 +155,7 @@ int current_room_num(void)                              // 현재 존재하는 �
 
     // critical section
 
-    for(i = 0; i < MAX_SIZE; i++)
+    for(i = 0, ret = 0; i < MAX_SIZE; i++)
     {
         if(room_list[i].num_of_mem != -1)
         {
