@@ -76,11 +76,9 @@ typedef struct _room
 //  DATA RACE BLOCK
 room room_list[MAX_ROOM_SIZE];      // 방 목록
 member online_users[MAX_SIZE];      // 접속중인 유저 리스트 -> 서버에 접속한 순서대로 인덱스에 채워넣음 || 로그아웃 인원 생기면 그 자리 비우고 새 유저에게 그 공간 할당
-member registered_users[MAX_SIZE];   // 등록된 모든 유저 리스트 -> 등록한 순서대로 인덱스와 같은 id 부여 || client와 연결 시 online_users 배열에 정보 입력하기 위한 저장공간
+member registered_users[MAX_SIZE];  // 등록된 모든 유저 리스트 -> 등록한 순서대로 인덱스와 같은 id 부여 || client와 연결 시 online_users 배열에 정보 입력하기 위한 저장공간
 //  DATA RACE BLOCK
 
-// Mutex
-HANDLE hMutex;
 FILE* mem_list;                     // 유저 목록이 저장될 파일(서버 종료 시 저장 | 일정 시간 경과 후 주기적으로 백업)
 
 /*
@@ -104,7 +102,7 @@ static const char *ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
 /* 데이터 베이스 관리 함수 | DB_management.c */
 
 int write_to_file(FILE *output, int type);               // DB 파일로 출력
-int read_from_file(FILE *input, int type);               // DB 파일 읽어오기
+void read_from_file();                                   // DB 파일 읽어오기 | 서버 가동시 최초 실행되어 registered_users 가져옴
 int make_chat_log(FILE *output, room *target);           // 채팅 내용 파일에 저장
 bool exist_user(char *id);                               // 유저 검색(계정 등록 위해 존재 유무 파악)
 
