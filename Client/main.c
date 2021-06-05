@@ -18,7 +18,7 @@ int main()
         exit(1);
     }
     
-    hSocket=socket(PF_INET, SOCK_STREAM, 0);
+    hSocket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
     if(hSocket==INVALID_SOCKET)
     {
         crit_error_handling("socket() error.");
