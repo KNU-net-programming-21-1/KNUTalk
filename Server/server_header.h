@@ -134,7 +134,7 @@ int packet_send(int user_id, void *packet);         // 패킷 전송
 
 /* Thread | thread.c */
 
-int accept_thread(int port);                            // client -> server accept thread
+int accept_thread(int *port);                            // client -> server accept thread
 DWORD WINAPI WorkerThread(LPVOID CompletionPortIO);     // worker thread
 
 /* Error Handling 함수 | error_handling.c */
