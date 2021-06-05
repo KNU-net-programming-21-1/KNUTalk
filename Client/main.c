@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <WinSock2.h>
+#include "client_header.h"
+#include "packet_header.h"
 
 int main()
 {
@@ -11,6 +13,9 @@ int main()
     SOCKET hSocket;
     SOCKADDR_IN servAdr;
     
+    char id[ID_SIZE];
+    char pw[PW_SIZE];
+    int menu;
     int port;
 
     if(WSAStartup(MAKEWORD(2, 2), &wsaData)!=0)
@@ -36,7 +41,21 @@ int main()
     else
         puts("Connected......");
 
-    Sleep(500);
+    
+    while(1){
+        printf("ID, PW ют╥б:");
+        printf("ID : ");
+        scanf("%s",id);
+        printf("PW : ");
+        scanf("%s",pw);
+        
+
+        
+
+        
+
+    }
+
 
     closesocket(hSocket);
     WSACleanup();
