@@ -2,7 +2,7 @@
 #include <process.h>
 #include <windows.h>
 
-int accept_thread(int port)
+int accept_thread(int *port)
 {
     WSADATA	wsaData;
 	HANDLE hComPort;	
@@ -40,7 +40,7 @@ int accept_thread(int port)
 	memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family = AF_INET;
 	servAdr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servAdr.sin_port = htons(atoi(port));
+	servAdr.sin_port = htons(*port);
 
     /* Set socket & create listen queue */
 	if(bind(hServSock, (SOCKADDR*)&servAdr, sizeof(servAdr))

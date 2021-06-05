@@ -7,6 +7,6 @@ int main()
 {
     int port_number;
     scanf("%d", &port_number);
-    accept_thread(port_number);
+    accept_thread(&port_number);
 	return 0;
 }
