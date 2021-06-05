@@ -2,8 +2,6 @@
 
 /*
     추가해야 할 패킷
-        - 입장 가능한 방의 리스트 정보를 담은 패킷(S -> C)
-        - 생성한 방의 이름과 유저 정보를 담은 패킷(C -> S)
         - ...
 */
 
@@ -23,7 +21,6 @@
 #define BLOCK       7
 #define ROOMINFO    8
 #define MAKEROOM    9
-
 
 // PACKET TYPE DEFINE END
 
@@ -136,7 +133,7 @@ typedef struct SC_packet_chat
 {
     char size;
     char type;
-    char user_id[ID_SIZE];    // 채팅 발신자
+    char user_name[ID_SIZE];    // 채팅 발신자
     char buf[BUF_SIZE];
 
 }packet_echo;   // S -> C room_id의 방에 buf 내용 echo
@@ -147,9 +144,9 @@ typedef struct CS_packet_block
 {
     char size;
     char type;
-    char name[ID_SIZE];
+    char user_name[ID_SIZE];
 
-}packet_block;  // C -> S user_id 사용자 블락
+}packet_block;  // C -> S name 사용자 블락
 
 typedef struct SC_packet_blocked
 {
@@ -177,15 +174,15 @@ typedef struct CS_packet_makeroom
     char size;
     char type;
     int user_id;
-    char name[MAX_SIZE];
+    char room_name[MAX_SIZE];
 
-}packet_makeroom;
+}packet_makeroom;       // C -> S 방 생성 요청
 
-typedef struct CS_packet_complete	// 위에 구조체랑 재정의 오류 나서 임의로 이름 바꿨습니다!
+typedef struct SC_packet_complete	// 위에 구조체랑 재정의 오류 나서 임의로 이름 바꿨습니다!
 {
     char size;
     char type;
     bool accept;
     int room_id;
 
-}packet_complete;
+}packet_complete;       // S -> C 방 생성 완료 여부 및 room_id

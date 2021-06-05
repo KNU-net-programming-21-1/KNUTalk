@@ -34,7 +34,7 @@ int echo_message(int user_id, int room_number, char *message)
     packet_echo packet;
 
     strcpy(packet.buf, message);
-    strcpy(packet.user_id, online_users[user_id].id);
+    strcpy(packet.user_name, online_users[user_id].id);
     packet.type = CHAT;
     packet.size = sizeof(packet_echo);
 

@@ -43,12 +43,11 @@ void read_from_file()                               // DB 파일 읽어오기
 
     while(!fscanf(mem_list,"%d %s %s",&tmp.user_id, tmp.id, tmp.pw))
     {
+        registered_users[tmp.user_id].user_id = tmp.user_id;
         strcpy(registered_users[tmp.user_id].id,tmp.id);
         strcpy(registered_users[tmp.user_id].pw,tmp.pw);
     }
     
-    
-
 }
 int make_chat_log(FILE *output, room *target)       // 채팅 내용 파일에 저장
 {

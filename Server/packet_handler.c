@@ -48,7 +48,7 @@ int packet_handler(int id, char *packet_buffer)
     {
     case REGISTER:
         packet_register *packet_1 = (packet_register* )packet_buffer;
-        member_register(packet_1->id, packet_1->pw);
+        member_register(id, packet_1->id, packet_1->pw);
         break;
     case LOGIN:
         packet_login *packet_2 = (packet_login* )packet_buffer;
@@ -70,11 +70,11 @@ int packet_handler(int id, char *packet_buffer)
         break;
     case BLOCK:
         packet_block *packet_5 = (packet_block* )packet_buffer;
-        add_block_list(id, packet_5->name);
+        add_block_list(id, packet_5->user_name);
         break;
     case MAKEROOM:
         packet_makeroom *packet_6 = (packet_makeroom* )packet_buffer;
-        make_room(id, packet_6->name);
+        make_room(id, packet_6->room_name);
         break;
     }
     return 0;
@@ -83,8 +83,9 @@ int packet_handler(int id, char *packet_buffer)
 /*  client에게 packet 전송
     user_id(online_users 배열 인덱스)로 소켓을 찾아 packet 전송
     return value    buf[0] - 전송한 packet의 바이트 수
+                    IOCP_ERROR - WSASend 실패
 */
-int packet_send(int user_id, void *packet)
+int packet_send(int user_id, char *packet)
 {
     
     char *buf = (char*)packet;
@@ -97,7 +98,15 @@ int packet_send(int user_id, void *packet)
     new->wsaBuf.len = buf[0];
     memcpy(new->buffer, buf, buf[0]);
 
-    WSASend(target->memberInfo.s, &new->wsaBuf, 1, NULL, 0, &new->overlapped, NULL);
+    if(WSASend(target->memberInfo.s, &new->wsaBuf, 1, NULL, 0, &new->overlapped, NULL) == SOCKET_ERROR)
+    {
+        if(WSAGetLastError() != WSA_IO_PENDING)
+        {
+            logout(user_id);
+            closesocket(online_users[user_id].memberInfo.s);
+            return error_handling(IOCP_ERROR);
+        }
+    }
 
     return buf[0];
 }

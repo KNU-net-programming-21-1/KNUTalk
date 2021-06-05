@@ -123,17 +123,19 @@ int echo_message(int user_id, int room_number, char *message);      // 방 인�
 
 int login(int user_id, char *ID, char *PW);     // 서버에 로그인
 int logout(int user_id);                        // 서버에서 로그아웃
-int member_register(char *ID, char *PW);        // 서버에 계정 등록
-int search_user(char *id);                      // char id로 int user_id 검색
+int member_register(int user_id, char *ID, char *PW);        // 서버에 계정 등록
+int search_user(char *name);                    // char name으로 int user_id 검색
 
 /* 패킷 처리 함수 | packet_handler.c */
 
 void packet_construct(int user_id, int io_byte);    // IOCP 버퍼 내의 패킷 조립
 int packet_handler(int id, char *packet_buffer);    // 패킷의 타입에 따른 처리
-int packet_send(int user_id, void *packet);         // 패킷 전송
+int packet_send(int user_id, char *packet);         // 패킷 전송
 
 /* Thread | thread.c */
 
+// registered_users, online_users 등 전역변수에 대한 참조가 너무 많음...
+// 전부 mutex를 이용하면 성능 저하 우려 -> 메세지 큐 이용해서 commit하는 방법도 있지만 일단 보류
 int accept_thread(int port);                            // client -> server accept thread
 DWORD WINAPI WorkerThread(LPVOID CompletionPortIO);     // worker thread
 

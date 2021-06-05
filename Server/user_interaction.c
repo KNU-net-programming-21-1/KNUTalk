@@ -38,14 +38,15 @@ int login(int user_id, char *ID, char *PW)                  // 서버에 로그�
 int logout(int user_id)                         // 서버에서 로그아웃
 {
     packet_logout_accept packet;
-
-    registered_users[online_users[user_id].user_id].is_online = false;
-    online_users[user_id].user_id = -1;
+    
     packet.accept = true;
     packet.size = sizeof(packet_logout_accept);
     packet.type = LOGOUT;
+
+    registered_users[online_users[user_id].user_id].is_online = false;
+    online_users[user_id].user_id = -1;
     packet_send(user_id, &packet);
-    closesocket(online_users[user_id].memberInfo.s);
+    shutdown(online_users[user_id].memberInfo.s, SD_SEND);
 
     return 0;
 }
@@ -114,11 +115,11 @@ int registerd_user(void)
     return ret;
 }
 
-/*  char id로 검색하여 user_id 반환
+/*  char name으로 검색하여 user_id 반환
     return value    user_id - char id에 해당하는 유저의 index
                     -1      - 검색 실패
 */
-int search_user(char *id)                       // char id로 int user_id 검색
+int search_user(char *name)                       // char id로 int user_id 검색
 {
 	int user_id = -1;
 	int ret_num = registerd_user();
@@ -126,7 +127,7 @@ int search_user(char *id)                       // char id로 int user_id 검색
 
 	for (i = 0; i < ret_num; i++)
 	{
-		if (!strcmp(registered_users[i].id, id))
+		if (!strcmp(registered_users[i].id, name))
 		{
 			user_id = i;
 			break;

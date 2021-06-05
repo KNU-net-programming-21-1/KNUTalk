@@ -2,7 +2,7 @@
 #include <process.h>
 #include <windows.h>
 
-int accept_thread(int *port)
+int accept_thread(int port)
 {
     WSADATA	wsaData;
 	HANDLE hComPort;	
@@ -40,7 +40,7 @@ int accept_thread(int *port)
 	memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family = AF_INET;
 	servAdr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servAdr.sin_port = htons(*port);
+	servAdr.sin_port = htons(port);
 
     /* Set socket & create listen queue */
 	if(bind(hServSock, (SOCKADDR*)&servAdr, sizeof(servAdr))
@@ -75,6 +75,7 @@ int accept_thread(int *port)
 		if(empty_slot == LIMIT_REACHED)
 		{
 			/* send limit reached error packet to client */
+			shutdown(hClntSock, SD_SEND);
 			closesocket(hClntSock);
 		}
 		else
@@ -116,15 +117,17 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 		GQCS = GetQueuedCompletionStatus(hComPort, &bytesTrans, (LPDWORD)&handleInfo, (LPOVERLAPPED)&ioInfo, INFINITE);
 		socket = handleInfo->hClntSock;
 
-		if(GQCS || bytesTrans == 0)
+		if(!GQCS || !bytesTrans)
 		{
-			if(bytesTrans != 0)	
+			if(bytesTrans)	
 			{
 				error_handling(IOCP_ERROR);
 			}
-
-			logout(handleInfo->user_index);
-			closesocket(socket);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우 유저 로그아웃 처리
+			if(online_users[handleInfo->user_index].is_online)
+			{
+				logout(handleInfo->user_index);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우에도 유저 로그아웃 처리
+			}
+			closesocket(socket);
 			continue;
 		}
 
