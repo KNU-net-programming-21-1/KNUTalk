@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,7 @@ int main()
     WSADATA wsaData;
     SOCKET hSocket;
     SOCKADDR_IN servAdr;
- 
+    
     int port;
 
     if(WSAStartup(MAKEWORD(2, 2), &wsaData)!=0)
@@ -27,7 +28,7 @@ int main()
     scanf("%d", &port);
     memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family = AF_INET;
-	servAdr.sin_addr.s_addr = htonl("127.0.0.1");                                   // 나중에 수정
+    servAdr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	servAdr.sin_port = htons(port);
     
     if(connect(hSocket, (SOCKADDR*)&servAdr, sizeof(servAdr)) == SOCKET_ERROR)
