@@ -1,5 +1,4 @@
-#include "server_header.h"
-
+#include "client_header.h"
 /*
     추가해야 할 패킷
         - ...

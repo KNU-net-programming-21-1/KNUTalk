@@ -3,5 +3,11 @@
 */
 
 
-#define ID_SIZE 20
-#define PW_SIZE 20
+#define MAX_SIZE 100
+#define ID_SIZE 21
+#define PW_SIZE 21
+#define MAX_ROOM_SIZE 100
+#define BUF_SIZE 100
+#define PACKET_SIZE 1024
+
+#include <stdbool.h>
