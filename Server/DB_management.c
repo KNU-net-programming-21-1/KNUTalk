@@ -38,8 +38,17 @@ void init_server(){
     read_from_file();
 }
 
-int write_to_file(FILE *output, int type)           // DB 파일로 출력
+void write_to_file()                                    // DB 파일로 출력
 {
+    int i;
+    int new_users = registered_user();
+
+    fseek(mem_list, 0, SEEK_SET);                       // 파일 처음으로 이동해서 새로운 내용으로 덮어쓰기
+
+    for (i = 0; i < new_users; i++)
+    {
+        fprintf(mem_list, "%d %s %s\n", registered_users[i].user_id, registered_users[i].id, registered_users[i].pw);
+    }
 
 }
 void read_from_file()                               // DB 파일 읽어오기
@@ -52,6 +61,10 @@ void read_from_file()                               // DB 파일 읽어오기
         exit(1);
     }
 
+#if DEBUG
+    puts("Current Registered User List");
+#endif
+    
     while(fscanf(mem_list,"%d %s %s",&tmp.user_id, tmp.id, tmp.pw) != EOF)
     {
         registered_users[tmp.user_id].user_id = tmp.user_id;
@@ -62,7 +75,7 @@ void read_from_file()                               // DB 파일 읽어오기
         printf("USER ID : %d, ID: %s ,PW: %s\n", tmp.user_id, tmp.id, tmp.pw);
 #endif
     }
-    
+
 }
 int make_chat_log(FILE *output, room *target)       // 채팅 내용 파일에 저장
 {

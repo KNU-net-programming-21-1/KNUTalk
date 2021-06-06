@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <winsock2.h>
 #include "server_header.h"
 
 int main()
@@ -10,5 +7,8 @@ int main()
     scanf("%d", &port_number);
     init_server();
     accept_thread(port_number);
+    
+    fclose(mem_list);
+
 	return 0;
 }

@@ -36,7 +36,7 @@ int main()
     else
         puts("Connected......");
 
-    /* 로그인 테스트 */
+    /* Login test */
     while(1){
         printf("Login Test\n");
         printf("ID : ");
@@ -45,12 +45,12 @@ int main()
         scanf("%s",pw);
         
         packet_login login;
-        login.size = sizeof(packet_login);
+        login.size = LOGIN;
         login.type = READ;
         strcpy(login.id, id);
         strcpy(login.pw, pw);
 
-        memcpy(packet, (char*)&login, sizeof(packet_login));
+        memcpy(packet, &login, login.size);
 
         sendBytes = send(hSocket, packet, sizeof(packet_login), 0);
         printf("Send data len : %d\n", sendBytes);
@@ -59,7 +59,7 @@ int main()
         recvBytes = recv(hSocket, packet, sizeof(packet_accept), 0);
 
         if (*(packet + 2) == TRUE) {
-            printf("Login Success!");
+            printf("Login Success!\n");
             break;
         }
     }

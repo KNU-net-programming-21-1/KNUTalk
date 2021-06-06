@@ -43,7 +43,7 @@ void packet_construct(int *user_id, int io_byte)     // 스레드간 동기화 �
 
 int packet_handler(int *id, char *packet_buffer)
 {
-    switch (packet_buffer[1])
+    switch (packet_buffer[0])
     {
     case REGISTER:
     {
@@ -52,7 +52,7 @@ int packet_handler(int *id, char *packet_buffer)
 #endif
 
         packet_register* packet_1 = (packet_register*)packet_buffer;
-        member_register(*id, packet_1->id, packet_1->pw);
+        member_register(id, packet_1->id, packet_1->pw);
         break;
     }
     case LOGIN:
@@ -62,7 +62,7 @@ int packet_handler(int *id, char *packet_buffer)
 #endif
 
         packet_login* packet_2 = (packet_login*)packet_buffer;
-        login(*id, packet_2->id, packet_2->pw);
+        login(id, packet_2->id, packet_2->pw);
         break;
     }
     case LOGOUT:
@@ -125,11 +125,11 @@ int packet_handler(int *id, char *packet_buffer)
     return value    buf[0] - 전송한 packet의 바이트 수
                     IOCP_ERROR - WSASend 실패
 */
-int packet_send(int user_id, char *packet)
+int packet_send(int *user_id, char *packet)
 {
     
     char *buf = (char*)packet;
-    member *target = &online_users[user_id];
+    member *target = &online_users[*user_id];
     LPPER_IO_DATA new;
 
     new = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
@@ -143,7 +143,7 @@ int packet_send(int user_id, char *packet)
         if(WSAGetLastError() != WSA_IO_PENDING)
         {
             logout(user_id);
-            closesocket(online_users[user_id].memberInfo.s);
+            closesocket(online_users[*user_id].memberInfo.s);
             return error_handling(IOCP_ERROR);
         }
     }

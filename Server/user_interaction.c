@@ -30,12 +30,12 @@ int login(int *user_id, char *ID, char *PW)                  // 서버에 로그
         packet.accept = false;
     }
     
-    packet_send(*user_id, &packet);
+    packet_send(user_id, &packet);
 
     return 0;
 }
 
-int logout(int user_id)                         // 서버에서 로그아웃
+int logout(int *user_id)                         // 서버에서 로그아웃
 {
     packet_logout_accept packet;
     
@@ -43,10 +43,10 @@ int logout(int user_id)                         // 서버에서 로그아웃
     packet.size = sizeof(packet_logout_accept);
     packet.type = LOGOUT;
 
-    registered_users[online_users[user_id].user_id].is_online = false;
-    online_users[user_id].user_id = -1;
+    registered_users[online_users[*user_id].user_id].is_online = false;
+    online_users[*user_id].user_id = -1;
     packet_send(user_id, &packet);
-    shutdown(online_users[user_id].memberInfo.s, SD_SEND);
+    shutdown(online_users[*user_id].memberInfo.s, SD_SEND);
 
     return 0;
 }
@@ -57,7 +57,7 @@ int logout(int user_id)                         // 서버에서 로그아웃
                     DATA_DUPLICATE - ID 중복
                     DATA_FAILURE - 잘못된 입력 양식
 */
-int member_register(int user_id, char *ID, char *PW)         // 서버에 계정 등록
+int member_register(int *user_id, char *ID, char *PW)         // 서버에 계정 등록
 {
     int ret_num;
     int id_len, pw_len;
@@ -77,12 +77,12 @@ int member_register(int user_id, char *ID, char *PW)         // 서버에 계정
     }
 	else if(id_len > 4 && id_len < 20 && pw_len > 10 && pw_len < 20)
     {
-		ret_num = registerd_user();
+		ret_num = registered_user();
 
 		strcpy(registered_users[ret_num].id, ID);
 		strcpy(registered_users[ret_num].pw, PW);
 		registered_users[ret_num].user_id = ret_num;
-        registered_users[ret_num].is_online = false;     // 등록 성공할 경우 초기화면으로 돌아가 로그인 필요
+        registered_users[ret_num].is_online = false;     // 등록 성공할 경우 초기화면으로 돌아가 로그인 필요 (클라이언트에서 루프로 처리, 성공 -> 루프 탈출)
 
         packet.accept = true;
         packet_send(user_id, &packet);
@@ -100,7 +100,7 @@ int member_register(int user_id, char *ID, char *PW)         // 서버에 계정
 /*  등록된 유저 수 반환 함수
     return value    ret - 등록된 유저 수
 */
-int registerd_user(void)
+int registered_user(void)
 {
     int ret;
 
@@ -122,7 +122,7 @@ int registerd_user(void)
 int search_user(char *name)                       // char id로 int user_id 검색
 {
 	int user_id = -1;
-	int ret_num = registerd_user();
+	int ret_num = registered_user();
 	int i;
 
 	for (i = 0; i < ret_num; i++)

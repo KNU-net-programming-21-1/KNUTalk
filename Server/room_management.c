@@ -6,7 +6,7 @@
     return value    id - 새로 생성된 방의 id
                     LIMIT_REACHED - 최대 생성 가능한 방의 개수에 도달했을 경우
 */
-int make_room(int user_id, char *name)                       // 방 생성 | room_list access (need mutex)
+int make_room(int *user_id, char *name)                       // 방 생성 | room_list access (need mutex)
 {
     int id = find_empty_room();
     int i;
@@ -32,7 +32,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
             room_list[id].member_list[i] = -1;
         }
 
-        room_list[id].member_list[0] = online_users[user_id].user_id;
+        room_list[id].member_list[0] = online_users[*user_id].user_id;
         
         // end of critical section
 
@@ -49,7 +49,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
                     SEARCH_ERROR - id에 해당하는 방이 존재하지 않음
                     LIMIT_REACHED  - 해당 방에 참가 가능한 최대 인원 수 초과
 */
-int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
+int enter_room(int *room_id, int *user_id)              // 방 참가 (need mutex)
 {
     int member_count;
     int i;
@@ -57,11 +57,11 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
 
     packet.size = sizeof(packet_join);
     packet.type = ENTER;
-    packet.room_id = room_id;
+    packet.room_id = *room_id;
 
     // critical section
     
-    member_count = room_list[room_id].num_of_mem;
+    member_count = room_list[*room_id].num_of_mem;
     
     // end of critical section
 
@@ -83,15 +83,15 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
     {
         // critical section
 
-        room_list[room_id].member_list[member_count] = online_users[user_id].user_id;
-        room_list[room_id].num_of_mem++;        
-        strcpy(packet.user_name, online_users[user_id].id);
+        room_list[*room_id].member_list[member_count] = online_users[*user_id].user_id;
+        room_list[*room_id].num_of_mem++;        
+        strcpy(packet.user_name, online_users[*user_id].id);
         packet.accept = true;
         packet.room_id = room_id;
 
-        for(i = 0; i < room_list[room_id].num_of_mem; i++)
+        for(i = 0; i < room_list[*room_id].num_of_mem; i++)
         {
-            packet_send(room_list[room_id].member_list[i], &packet);
+            packet_send(room_list[*room_id].member_list[i], &packet);
         }
 
         // end of critical section
@@ -104,14 +104,14 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
     member.room_list에서 cur_room이 아닌 방도 퇴장 가능하게 하려면 수정 필요
     return value    0 - 정상 종료
 */
-int quit_room(int user_id)                        // 방 나가기
+int quit_room(int *user_id)                        // 방 나가기
 {
     int i;
-    int current = online_users[user_id].cur_room;
+    int current = online_users[*user_id].cur_room;
 
     for(i = 0; i < room_list[current].num_of_mem; i++)
     {
-        if(room_list[current].member_list[i] == online_users[user_id].user_id)
+        if(room_list[current].member_list[i] == online_users[*user_id].user_id)
         {
             for(; i < room_list[current].num_of_mem; i++)
             {
@@ -128,18 +128,18 @@ int quit_room(int user_id)                        // 방 나가기
 
 /*  존재하는 방 삭제
 */
-int delete_room(int id)                                 // 방 삭제 | room_list access (need mutex)
+int delete_room(int *id)                                 // 방 삭제 | room_list access (need mutex)
 {
     int i;
 
     // critical section
 
-    strcpy(room_list[id].room_name, NULL);
-    for(i = 0; i < room_list[id].num_of_mem; i++)
+    strcpy(room_list[*id].room_name, NULL);
+    for(i = 0; i < room_list[*id].num_of_mem; i++)
     {
-        room_list[id].member_list[i] = -1;
+        room_list[*id].member_list[i] = -1;
     }
-    room_list[id].num_of_mem = -1;
+    room_list[*id].num_of_mem = -1;
     
     // end of critical section
 
