@@ -31,6 +31,7 @@ void init_server(){
     int i;
     
     for(i=0;i<MAX_SIZE;i++){
+		registered_users[i].user_id = -1;
         online_users[i].user_id = -1;
     }
 
