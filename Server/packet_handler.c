@@ -43,39 +43,52 @@ void packet_construct(int user_id, int io_byte)     // 스레드간 동기화 �
 
 int packet_handler(int id, char *packet_buffer)
 {
-
     switch (packet_buffer[1])
     {
     case REGISTER:
-        packet_register *packet_1 = (packet_register* )packet_buffer;
+    {
+        packet_register* packet_1 = (packet_register*)packet_buffer;
         member_register(id, packet_1->id, packet_1->pw);
         break;
+    }
     case LOGIN:
-        packet_login *packet_2 = (packet_login* )packet_buffer;
+    {
+        packet_login* packet_2 = (packet_login*)packet_buffer;
         login(id, packet_2->id, packet_2->pw);
         break;
+    }
     case LOGOUT:
+    {
         logout(id);
         break;
+    }
     case ENTER:
-        packet_enter *packet_3 = (packet_enter* )packet_buffer;
+    {
+        packet_enter* packet_3 = (packet_enter*)packet_buffer;
         enter_room(packet_3->room_id, id);
         break;
+    }
     case LEAVE:
         quit_room(id);
         break;
     case CHAT:
-        packet_chat *packet_4 = (packet_chat* )packet_buffer;
+    {
+        packet_chat* packet_4 = (packet_chat*)packet_buffer;
         echo_message(id, packet_4->room_id, packet_4->buf);
         break;
+    }
     case BLOCK:
-        packet_block *packet_5 = (packet_block* )packet_buffer;
+    {
+        packet_block* packet_5 = (packet_block*)packet_buffer;
         add_block_list(id, packet_5->user_name);
         break;
+    }
     case MAKEROOM:
-        packet_makeroom *packet_6 = (packet_makeroom* )packet_buffer;
+    {
+        packet_makeroom* packet_6 = (packet_makeroom*)packet_buffer;
         make_room(id, packet_6->room_name);
         break;
+    }
     }
     return 0;
 }
