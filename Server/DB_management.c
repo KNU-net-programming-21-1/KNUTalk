@@ -57,6 +57,10 @@ void read_from_file()                               // DB 파일 읽어오기
         registered_users[tmp.user_id].user_id = tmp.user_id;
         strcpy(registered_users[tmp.user_id].id,tmp.id);
         strcpy(registered_users[tmp.user_id].pw,tmp.pw);
+
+#if DEBUG
+        printf("USER ID : %d, ID: %s PW: %s\n",tmp.user_id, tmp.id, tmp.pw);
+#endif
     }
     
 }

@@ -9,5 +9,14 @@
 #define MAX_ROOM_SIZE 100
 #define BUF_SIZE 100
 #define PACKET_SIZE 1024
+#define READ	3
+#define	WRITE	5
 
+#define _CRT_SECURE_NO_WARNINGS
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <WinSock2.h>
 #include <stdbool.h>
+#include "cln_packet_header.h"

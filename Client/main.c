@@ -1,11 +1,5 @@
-#define _CRT_SECURE_NO_WARNINGS
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <WinSock2.h>
 #include "client_header.h"
-#include "packet_header.h"
+
 
 int main()
 {
@@ -13,9 +7,10 @@ int main()
     SOCKET hSocket;
     SOCKADDR_IN servAdr;
     
+    char packet[PACKET_SIZE];
     char id[ID_SIZE];
     char pw[PW_SIZE];
-    int menu;
+    int sendBytes, recvBytes;
     int port;
 
     if(WSAStartup(MAKEWORD(2, 2), &wsaData)!=0)
@@ -41,19 +36,32 @@ int main()
     else
         puts("Connected......");
 
-    
+    /* 로그인 테스트 */
     while(1){
-        printf("ID, PW 입력:");
+        printf("Login Test\n");
         printf("ID : ");
         scanf("%s",id);
         printf("PW : ");
         scanf("%s",pw);
         
+        packet_login login;
+        login.size = sizeof(packet_login);
+        login.type = READ;
+        strcpy(login.id, id);
+        strcpy(login.pw, pw);
 
-        
+        memcpy(packet, (char*)&login, sizeof(packet_login));
 
-        
+        sendBytes = send(hSocket, packet, sizeof(packet_login), 0);
+        printf("Send data len : %d", sendBytes);
 
+
+        recvBytes = recv(hSocket, packet, sizeof(packet_accept), 0);
+
+        if (*(packet + 2) == TRUE) {
+            printf("Login Success!");
+            break;
+        }
     }
 
 
