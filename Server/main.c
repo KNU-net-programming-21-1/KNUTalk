@@ -7,9 +7,8 @@ int main()
 {
     int port_number;
 
-    read_from_file();
     scanf("%d", &port_number);
-
+    init_server();
     accept_thread(port_number);
 	return 0;
 }

@@ -27,6 +27,16 @@ typedef struct _file_data{
 
 const char* input_file = "usr.txt";
 
+void init_server(){
+    int i;
+    
+    for(i=0;i<MAX_SIZE;i++){
+        online_users[i].user_id = -1;
+    }
+
+    read_from_file();
+}
+
 int write_to_file(FILE *output, int type)           // DB 파일로 출력
 {
 
