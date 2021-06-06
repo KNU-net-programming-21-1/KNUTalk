@@ -4,7 +4,15 @@
     구조체 변수 , 함수 정의 헤더파일
     ******************************
 */
-#pragma once                    // fix debug error
+
+/* fix debug error */
+#pragma once                    
+#define _CRT_SECURE_NO_WARNINGS
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
+/* for debugging*/
+#define DEBUG 1                                     // 디버깅 용으로 만들었습니다. 0으로 바꾸면 일반 실행입니다.
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -128,8 +136,8 @@ int search_user(char *name);                    // char name으로 int user_id �
 
 /* 패킷 처리 함수 | packet_handler.c */
 
-void packet_construct(int user_id, int io_byte);    // IOCP 버퍼 내의 패킷 조립
-int packet_handler(int id, char *packet_buffer);    // 패킷의 타입에 따른 처리
+void packet_construct(int *user_id, int io_byte);    // IOCP 버퍼 내의 패킷 조립
+int packet_handler(int *id, char *packet_buffer);    // 패킷의 타입에 따른 처리
 int packet_send(int user_id, char *packet);         // 패킷 전송
 
 /* Thread | thread.c */

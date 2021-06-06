@@ -2,7 +2,7 @@
 #include "packet_header.h"
 #include <string.h>
 
-int login(int user_id, char *ID, char *PW)                  // 서버에 로그인
+int login(int *user_id, char *ID, char *PW)                  // 서버에 로그인
 {
     int result = search_user(ID);
     packet_accept packet;
@@ -14,9 +14,9 @@ int login(int user_id, char *ID, char *PW)                  // 서버에 로그�
     {
 		if (!strcmp(registered_users[result].pw, PW))			// 로그인 성공
 		{
-			registered_users[result].memberInfo = online_users[user_id].memberInfo;
+			registered_users[result].memberInfo = online_users[*user_id].memberInfo;
 			registered_users[result].is_online = true;
-			online_users[user_id] = registered_users[result];
+			online_users[*user_id] = registered_users[result];
 
             packet.accept = true;
 		}
@@ -30,7 +30,7 @@ int login(int user_id, char *ID, char *PW)                  // 서버에 로그�
         packet.accept = false;
     }
     
-    packet_send(user_id, &packet);
+    packet_send(*user_id, &packet);
 
     return 0;
 }

@@ -133,7 +133,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 
 		if(ioInfo->rwMode == READ)	// recieved data
 		{
-			packet_construct(handleInfo->user_index, bytesTrans);	// 받은 패킷 조립 & 처리
+			packet_construct(&handleInfo->user_index, bytesTrans);	// 받은 패킷 조립 & 처리
 		}
 		
 		WSARecv(socket,	&(ioInfo->wsaBuf), 1, NULL, &flags, &(ioInfo->overlapped), NULL);	
