@@ -52,14 +52,14 @@ void read_from_file()                               // DB 파일 읽어오기
         exit(1);
     }
 
-    while(!fscanf(mem_list,"%d %s %s",&tmp.user_id, tmp.id, tmp.pw))
+    while(fscanf(mem_list,"%d %s %s",&tmp.user_id, tmp.id, tmp.pw) != EOF)
     {
         registered_users[tmp.user_id].user_id = tmp.user_id;
         strcpy(registered_users[tmp.user_id].id,tmp.id);
         strcpy(registered_users[tmp.user_id].pw,tmp.pw);
 
 #if DEBUG
-        printf("USER ID : %d, ID: %s PW: %s\n",tmp.user_id, tmp.id, tmp.pw);
+        printf("USER ID : %d, ID: %s ,PW: %s\n", tmp.user_id, tmp.id, tmp.pw);
 #endif
     }
     

@@ -53,7 +53,7 @@ int main()
         memcpy(packet, (char*)&login, sizeof(packet_login));
 
         sendBytes = send(hSocket, packet, sizeof(packet_login), 0);
-        printf("Send data len : %d", sendBytes);
+        printf("Send data len : %d\n", sendBytes);
 
 
         recvBytes = recv(hSocket, packet, sizeof(packet_accept), 0);
