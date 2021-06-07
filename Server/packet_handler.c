@@ -79,7 +79,7 @@ int packet_handler(int user_id, char *packet_buffer)
         printf("Enter Request from ID %d\n", user_id);
 #endif
         packet_enter* packet_4 = (packet_enter*)packet_buffer;
-        enter_room(&packet_4->room_id, user_id);
+        enter_room(packet_4->room_id, user_id);
         break;
     
     case LEAVE:
