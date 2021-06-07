@@ -93,6 +93,7 @@ int accept_thread(int port)
 			ioInfo->wsaBuf.buf = ioInfo->buffer;
 			ioInfo->rwMode = READ;
 			
+			online_users[empty_slot].memberInfo.s = hClntSock;
 			online_users[empty_slot].memberInfo.exOver = ioInfo;
 			online_users[empty_slot].is_online = true;
 			WSARecv(handleInfo->hClntSock,	&(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);	

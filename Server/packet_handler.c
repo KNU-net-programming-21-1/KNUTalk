@@ -136,6 +136,8 @@ int packet_send(int *user_id, char *packet)
     new->rwMode = WRITE;
     new->wsaBuf.buf = new->buffer;
     new->wsaBuf.len = buf[0];
+
+    memset(&new->overlapped, 0x00, sizeof(OVERLAPPED));
     memcpy(new->buffer, buf, buf[0]);
 
     if(WSASend(target->memberInfo.s, &new->wsaBuf, 1, NULL, 0, &new->overlapped, NULL) == SOCKET_ERROR)

@@ -6,7 +6,6 @@
 
 /* fix debug error */
 #pragma once                    
-//#pragma comment (linker,"/STACK:22496080")        // 스택 오버플로우 날 경우 스택 크기 조절 (숫자 변경)
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
