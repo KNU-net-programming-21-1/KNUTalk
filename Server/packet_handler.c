@@ -43,7 +43,7 @@ void packet_construct(int *user_id, int io_byte)     // 스레드간 동기화 �
 
 int packet_handler(int *id, char *packet_buffer)
 {
-    switch (packet_buffer[0])
+    switch (packet_buffer[1])
     {
     case REGISTER:
     {

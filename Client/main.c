@@ -45,8 +45,8 @@ int main()
         scanf("%s",pw);
         
         packet_login login;
-        login.size = LOGIN;
-        login.type = READ;
+        login.size = sizeof(packet_login);
+        login.type = LOGIN;
         strcpy(login.id, id);
         strcpy(login.pw, pw);
 
