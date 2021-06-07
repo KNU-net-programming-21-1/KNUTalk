@@ -9,7 +9,7 @@
 */
 
 // PACKET TYPE DEFINE
-
+#define QUIT		0		// 여기에 넣어두는 편이 보기 수월할거라 생각해서 추가해두겠습니다.
 #define REGISTER    1
 #define LOGIN       2
 #define LOGOUT      3
