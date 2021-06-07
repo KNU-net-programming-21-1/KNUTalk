@@ -211,9 +211,9 @@ int main()
 		case MAKEROOM:	//수정필요
 		{
 			packet_makeroom CS_makeroom;
-			CS_makeroom.type = LOGIN;
+			CS_makeroom.type = MAKEROOM;
 			CS_makeroom.size = sizeof(packet_makeroom);
-
+			printf("%d",sizeof(packet_makeroom));
 			printf("room ID : ");
 			scanf(" %s", &CS_makeroom.room_name);
 

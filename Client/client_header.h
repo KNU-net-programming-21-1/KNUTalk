@@ -7,10 +7,11 @@
 #define ID_SIZE 21
 #define PW_SIZE 21
 #define MAX_ROOM_SIZE 100
-#define BUF_SIZE 100
+#define BUF_SIZE 200
 #define PACKET_SIZE 1024
 #define READ	3
 #define	WRITE	5
+#define QUIT 0
 
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS

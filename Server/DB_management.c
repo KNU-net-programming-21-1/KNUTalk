@@ -33,6 +33,7 @@ void init_server(){
     for(i=0;i<MAX_SIZE;i++){
 		registered_users[i].user_id = -1;
         online_users[i].user_id = -1;
+        room_list[i].num_of_mem = -1;
     }
 
     read_from_file();
