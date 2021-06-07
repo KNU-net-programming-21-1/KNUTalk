@@ -213,8 +213,7 @@ int main()
 			packet_makeroom CS_makeroom;
 			CS_makeroom.type = MAKEROOM;
 			CS_makeroom.size = sizeof(packet_makeroom);
-			printf("%d",sizeof(packet_makeroom));
-			printf("room ID : ");
+			printf("Room Name : ");
 			scanf(" %s", &CS_makeroom.room_name);
 
 			send(hSocket, (const char*)&CS_makeroom, sizeof(packet_makeroom), 0);

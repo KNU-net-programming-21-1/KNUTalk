@@ -135,7 +135,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 		if(ioInfo->rwMode == READ)	// recieved data
 		{
 #ifdef DEBUG
-			printf("Recv Len: %d\n",bytesTrans);
+			printf("Received Packet Len: %d\n",bytesTrans);
 #endif
 			packet_construct(&handleInfo->user_index, bytesTrans);	// 받은 패킷 조립 & 처리
 		}
