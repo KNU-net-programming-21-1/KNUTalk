@@ -25,8 +25,11 @@ int main()
     {
         crit_error_handling("socket() error.");
     }    
-    
+#if DEBUG == 0    
     scanf("%d", &port);
+#else
+	port = 65535;
+#endif
     memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family = AF_INET;
     servAdr.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -94,12 +97,15 @@ int main()
 				packet_login CS_login;
 				CS_login.type = LOGIN;
 				CS_login.size = sizeof(packet_login);
-
+#if DEBUG == 0
 				printf("ID : ");
 				scanf(" %s", &CS_login.id);
 				printf("PW : ");
 				scanf(" %s", &CS_login.pw);
-
+#else	// for debug mode
+				strcpy(CS_login.id, "root");
+				strcpy(CS_login.pw, "root");
+#endif
 				send(hSocket, (const char*)&CS_login, sizeof(packet_login), 0);
 
 				recvBytes = recv(hSocket, packet, sizeof(packet_accept), 0);
@@ -181,11 +187,11 @@ int main()
 		case ENTER:
 		{
 			packet_enter CS_enter;
-			CS_enter.type = LOGIN;
+			CS_enter.type = ENTER;
 			CS_enter.size = sizeof(packet_enter);
 
 			printf("room ID : ");
-			scanf(" %s", &CS_enter.room_id);
+			scanf(" %d", &CS_enter.room_id);
 
 			send(hSocket, (const char*)&CS_enter, sizeof(packet_enter), 0);
 
@@ -194,12 +200,12 @@ int main()
 
 			if (SC_enter->accept == true)
 			{
-				printf("%d방에 입장하였습니다.\n", SC_enter->room_id);
+				printf("%d 방에 입장하였습니다.\n", SC_enter->room_id);
 				break;
 			}
 			else
 			{
-				printf("%d방에 입장하지 못하였습니다.\n", SC_enter->room_id);
+				printf("%d 방에 입장하지 못하였습니다.\n", SC_enter->room_id);
 				break;
 			}
 			break;
@@ -223,12 +229,12 @@ int main()
 
 			if (SC_complete->accept == true)
 			{
-				printf("%d방을 생성하였습니다.\n", SC_complete->room_id);
+				printf("%d 방을 생성하였습니다.\n", SC_complete->room_id);
 				break;
 			}
 			else
 			{
-				printf("%d방을 생성하지 못하였습니다.\n", SC_complete->room_id);
+				printf("%d 방을 생성하지 못하였습니다.\n", SC_complete->room_id);
 				break;
 			}
 			break;

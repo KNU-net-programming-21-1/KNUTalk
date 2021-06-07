@@ -6,11 +6,12 @@
 
 /* fix debug error */
 #pragma once                    
+
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 /* for debugging*/
-#define DEBUG 1                                     // 디버깅 용으로 만들었습니다. 0으로 바꾸면 일반 실행입니다.
+#define DEBUG 1                                     // for debug , 0 -> normal
 
 #include <stdbool.h>
 #include <stdio.h>

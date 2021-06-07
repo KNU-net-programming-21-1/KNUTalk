@@ -2,6 +2,7 @@
     그러면 오프라인 상태일 때 생겨난 채팅 로그의 처리는?
 */
 
+#define DEBUG 1                                 // for debug
 
 #define MAX_SIZE 100
 #define ID_SIZE 21

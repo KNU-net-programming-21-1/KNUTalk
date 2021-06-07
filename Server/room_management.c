@@ -25,7 +25,7 @@ int make_room(int *user_id, char *name)                       // 방 생성 | ro
     {
         // critical section
 
-        room_list[id].num_of_mem = 1;
+        room_list[id].num_of_mem = 0;
         strcpy(room_list[id].room_name, name);
         for(i = 0; i < MAX_SIZE; i++)
         {
@@ -34,6 +34,14 @@ int make_room(int *user_id, char *name)                       // 방 생성 | ro
 
         room_list[id].member_list[0] = online_users[*user_id].user_id;
         
+#if DEBUG == 1
+        printf("Room Info\n");
+        for (i = 0; i < find_empty_room(); i++)
+        {
+            printf("Room ID: %d, Room Name: %s\n",i,room_list[i].room_name);
+        }
+#endif
+
         // end of critical section
 
         packet.accept = true;
@@ -87,11 +95,11 @@ int enter_room(int *room_id, int *user_id)              // 방 참가 (need mute
         room_list[*room_id].num_of_mem++;        
         strcpy(packet.user_name, online_users[*user_id].id);
         packet.accept = true;
-        packet.room_id = room_id;
+        packet.room_id = *room_id;
 
         for(i = 0; i < room_list[*room_id].num_of_mem; i++)
         {
-            packet_send(room_list[*room_id].member_list[i], &packet);
+            packet_send(&room_list[*room_id].member_list[i], &packet);                   // 만약 클라이언트가 다른 행동 중이었다면? -> 응답 패킷인지, 브로드캐스팅 패킷인지 구별하기 위한 과정 필요
         }
 
         // end of critical section

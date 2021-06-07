@@ -81,7 +81,7 @@ int packet_handler(int *id, char *packet_buffer)
 #endif
       
         packet_enter* packet_3 = (packet_enter*)packet_buffer;
-        enter_room(packet_3->room_id, id);
+        enter_room(&packet_3->room_id, id);
         break;
     }
     case LEAVE:
@@ -127,7 +127,9 @@ int packet_handler(int *id, char *packet_buffer)
 */
 int packet_send(int *user_id, char *packet)
 {
-    
+#if DEBUG == 1
+    puts("PACKET SEND");
+#endif
     char *buf = (char*)packet;
     member *target = &online_users[*user_id];
     LPPER_IO_DATA new;
@@ -150,5 +152,6 @@ int packet_send(int *user_id, char *packet)
         }
     }
 
+    free(new);
     return buf[0];
 }
