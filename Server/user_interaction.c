@@ -18,6 +18,7 @@ int login(int user_id, char *ID, char *PW)                  // 서버에 로그�
 			registered_users[result].is_online = true;
 			online_users[user_id] = registered_users[result];
 
+            packet.user_id = user_id;
             packet.accept = true;
 		}
 		else													// 로그인 실패 -> error node 추가?
@@ -44,7 +45,9 @@ int logout(int user_id)                         // 서버에서 로그아웃
     packet.type = LOGOUT;
 
     registered_users[online_users[user_id].user_id].is_online = false;
+    online_users[user_id].is_online = false;
     online_users[user_id].user_id = -1;
+    
     return 0;
 }
 

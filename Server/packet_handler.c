@@ -148,7 +148,6 @@ int packet_send(int user_id, char *packet)
             return error_handling(IOCP_ERROR + OFFSET);
         }
     }
-
-    free(new);
+    
     return buf[0];
 }

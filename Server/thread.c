@@ -138,9 +138,14 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 			printf("Received Packet Len: %d\n",bytesTrans);
 #endif
 			packet_construct(handleInfo->user_index, bytesTrans);	// 받은 패킷 조립 & 처리
+
+			WSARecv(socket,	&(ioInfo->wsaBuf), 1, NULL, &flags, &(ioInfo->overlapped), NULL);	
+		}
+		else if(ioInfo->rwMode == WRITE)
+		{
+			free(ioInfo);
 		}
 		
-		WSARecv(socket,	&(ioInfo->wsaBuf), 1, NULL, &flags, &(ioInfo->overlapped), NULL);	
 	}
 		
 	return 0;
