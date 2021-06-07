@@ -115,10 +115,10 @@ int make_chat_log(FILE *output, room *target);           // 채팅 내용 파일
 
 /* 방에 관련된 함수 | room_management.c */
 
-int make_room(int *id, char *name);                  // 방 생성
-int enter_room(int *room_id, int *user_id);           // 방 참가
-int quit_room(int *user_id);                         // 방 나가기
-int delete_room(int *id);                            // 방 삭제
+int make_room(int id, char *name);                  // 방 생성
+int enter_room(int room_id, int user_id);           // 방 참가
+int quit_room(int user_id);                         // 방 나가기
+int delete_room(int room_id);                            // 방 삭제
 int current_room_num(void);                         // 현재 존재하는 방 개수
 int find_empty_room(void);                          // 방 생성이 가능한 room_id
 
@@ -129,16 +129,16 @@ int echo_message(int user_id, int room_number, char *message);      // 방 인�
 
 /* 서버에서 처리할 함수 | user_interaction.c */
 
-int login(int *user_id, char *ID, char *PW);     // 서버에 로그인
-int logout(int *user_id);                        // 서버에서 로그아웃
-int member_register(int *user_id, char *ID, char *PW);        // 서버에 계정 등록
+int login(int user_id, char *ID, char *PW);     // 서버에 로그인
+int logout(int user_id);                        // 서버에서 로그아웃
+int member_register(int user_id, char *ID, char *PW);        // 서버에 계정 등록
 int search_user(char *name);                    // char name으로 int user_id 검색
 int registered_user();                          // 가입된 유저 수 반환
 /* 패킷 처리 함수 | packet_handler.c */
 
-void packet_construct(int *user_id, int io_byte);    // IOCP 버퍼 내의 패킷 조립
-int packet_handler(int *id, char *packet_buffer);    // 패킷의 타입에 따른 처리
-int packet_send(int *user_id, char *packet);         // 패킷 전송
+void packet_construct(int user_id, int io_byte);    // IOCP 버퍼 내의 패킷 조립
+int packet_handler(int user_id, char *packet_buffer);    // 패킷의 타입에 따른 처리
+int packet_send(int user_id, char *packet);         // 패킷 전송
 
 /* Thread | thread.c */
 
@@ -149,5 +149,5 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO);     // worker thread
 
 /* Error Handling 함수 | error_handling.c */
 
-int error_handling(int errno);                          // print stderr | return errno
+int error_handling(int err);                          // print stderr | return errno
 void crit_error_handling(char* err_message);            // print stderr | exit(-1)

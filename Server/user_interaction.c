@@ -2,7 +2,7 @@
 #include "packet_header.h"
 #include <string.h>
 
-int login(int *user_id, char *ID, char *PW)                  // 서버에 로그인
+int login(int user_id, char *ID, char *PW)                  // 서버에 로그인
 {
     int result = search_user(ID);
     packet_accept packet;
@@ -14,9 +14,9 @@ int login(int *user_id, char *ID, char *PW)                  // 서버에 로그
     {
 		if (!strcmp(registered_users[result].pw, PW))			// 로그인 성공
 		{
-			registered_users[result].memberInfo = online_users[*user_id].memberInfo;
+			registered_users[result].memberInfo = online_users[user_id].memberInfo;
 			registered_users[result].is_online = true;
-			online_users[*user_id] = registered_users[result];
+			online_users[user_id] = registered_users[result];
 
             packet.accept = true;
 		}
@@ -35,7 +35,7 @@ int login(int *user_id, char *ID, char *PW)                  // 서버에 로그
     return 0;
 }
 
-int logout(int *user_id)                         // 서버에서 로그아웃
+int logout(int user_id)                         // 서버에서 로그아웃
 {
     packet_logout_accept packet;
     
@@ -43,11 +43,8 @@ int logout(int *user_id)                         // 서버에서 로그아웃
     packet.size = sizeof(packet_logout_accept);
     packet.type = LOGOUT;
 
-    registered_users[online_users[*user_id].user_id].is_online = false;
-    online_users[*user_id].user_id = -1;
-    packet_send(user_id, &packet);
-    shutdown(online_users[*user_id].memberInfo.s, SD_SEND);
-
+    registered_users[online_users[user_id].user_id].is_online = false;
+    online_users[user_id].user_id = -1;
     return 0;
 }
 
@@ -57,7 +54,7 @@ int logout(int *user_id)                         // 서버에서 로그아웃
                     DATA_DUPLICATE - ID 중복
                     DATA_FAILURE - 잘못된 입력 양식
 */
-int member_register(int *user_id, char *ID, char *PW)         // 서버에 계정 등록
+int member_register(int user_id, char *ID, char *PW)         // 서버에 계정 등록
 {
     int ret_num;
     int id_len, pw_len;
@@ -73,7 +70,7 @@ int member_register(int *user_id, char *ID, char *PW)         // 서버에 계�
     {
         packet.accept = DATA_DUPLICATE;
         packet_send(user_id, &packet);
-        return error_handling(DATA_DUPLICATE);
+        return error_handling(DATA_DUPLICATE + OFFSET);
     }
 	else if(id_len > 4 && id_len < 20 && pw_len > 10 && pw_len < 20)
     {
@@ -93,7 +90,7 @@ int member_register(int *user_id, char *ID, char *PW)         // 서버에 계�
     {
         packet.accept = DATA_FAILURE;
         packet_send(user_id, &packet);
-        return error_handling(DATA_FAILURE);
+        return error_handling(DATA_FAILURE + OFFSET);
     }
 }
 

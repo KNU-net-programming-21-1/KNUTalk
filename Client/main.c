@@ -157,7 +157,7 @@ int main()
 			while (1) // ¹Ýº¹¹®?
 			{
 				packet_logout CS_logout;
-				CS_logout.type = REGISTER;
+				CS_logout.type = LOGOUT;
 				CS_logout.size = sizeof(packet_logout);
 
 				/*

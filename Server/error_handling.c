@@ -1,10 +1,10 @@
 #include "server_header.h"
 
-int error_handling(int errno)
+int error_handling(int err)
 {
-	fputs(ERROR_CODE[errno + OFFSET], stderr);
+	fputs(ERROR_CODE[err], stderr);
 	fputc('\n', stderr);
-	return errno;
+	return err - OFFSET;
 }
 
 void crit_error_handling(char* err_message)

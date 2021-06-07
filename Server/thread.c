@@ -126,7 +126,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 			}
 			if(online_users[handleInfo->user_index].is_online)
 			{
-				logout(&handleInfo->user_index);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우에도 유저 로그아웃 처리
+				logout(handleInfo->user_index);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우에도 유저 로그아웃 처리
 			}
 			closesocket(socket);
 			continue;
@@ -137,7 +137,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 #ifdef DEBUG
 			printf("Received Packet Len: %d\n",bytesTrans);
 #endif
-			packet_construct(&handleInfo->user_index, bytesTrans);	// 받은 패킷 조립 & 처리
+			packet_construct(handleInfo->user_index, bytesTrans);	// 받은 패킷 조립 & 처리
 		}
 		
 		WSARecv(socket,	&(ioInfo->wsaBuf), 1, NULL, &flags, &(ioInfo->overlapped), NULL);	
