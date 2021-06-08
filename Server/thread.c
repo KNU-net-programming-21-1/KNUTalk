@@ -120,7 +120,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 
 		if(!GQCS || !bytesTrans)
 		{
-			if(bytesTrans)	
+			if(!GQCS)	
 			{
 				error_handling(IOCP_ERROR);
 			}
@@ -129,6 +129,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 				logout(handleInfo->user_index);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우에도 유저 로그아웃 처리
 			}
 			closesocket(socket);
+			free(ioInfo);
 			continue;
 		}
 

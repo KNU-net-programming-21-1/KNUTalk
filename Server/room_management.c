@@ -61,6 +61,7 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
 {
     int member_count;
     int i;
+    int member_id;
     packet_join packet;
 
     packet.size = sizeof(packet_join);
@@ -99,7 +100,12 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
 
         for(i = 0; i < room_list[room_id].num_of_mem; i++)
         {
-            packet_send(room_list[room_id].member_list[i], &packet);                   // 만약 클라이언트가 다른 행동 중이었다면? -> 응답 패킷인지, 브로드캐스팅 패킷인지 구별하기 위한 과정 필요
+            member_id = room_list[room_id].member_list[i];
+            if(online_users[member_id].cur_room == room_id) // 현재 방이 room_id인 유저에게만 패킷 전송
+            {
+                packet_send(member_id, &packet);
+            }
+            
         }
 
         // end of critical section
