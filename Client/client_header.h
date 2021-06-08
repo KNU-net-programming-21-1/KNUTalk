@@ -61,3 +61,5 @@ typedef struct _member
     int blocked_user_num;
     int block_list[MAX_SIZE];
 } member;
+
+DWORD WINAPI WorkerThread(LPVOID CompletionPortIO);     // worker thread
