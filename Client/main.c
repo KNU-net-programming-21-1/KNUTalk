@@ -269,7 +269,7 @@ int main()
 
 			printf("퇴장할 방 번호를 입력해주세요. : ");
 			scanf(" %d", &CS_leave.room_id);
-			send(hSocket, (const char*)&CS_chat, sizeof(packet_quit), 0);
+			send(hSocket, (const char*)&CS_leave, sizeof(packet_quit), 0);
 
 			printf("%d 방에서 퇴장하였습니다.\n", CS_leave.room_id);	// 수정 필요
 			break;
