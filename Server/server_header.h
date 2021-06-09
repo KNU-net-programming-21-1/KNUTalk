@@ -117,8 +117,8 @@ int make_chat_log(FILE *output, room *target);           // 채팅 내용 파일
 
 int make_room(int id, char *name);                  // 방 생성
 int enter_room(int room_id, int user_id);           // 방 참가
-int quit_room(int user_id);                         // 방 나가기
-int delete_room(int room_id);                            // 방 삭제
+int quit_room(int room_id, int user_id);            // 방 나가기
+int delete_room(int room_id);                       // 방 삭제
 int current_room_num(void);                         // 현재 존재하는 방 개수
 int find_empty_room(void);                          // 방 생성이 가능한 room_id
 

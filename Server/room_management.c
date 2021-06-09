@@ -118,21 +118,20 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
     member.room_list에서 cur_room이 아닌 방도 퇴장 가능하게 하려면 수정 필요
     return value    0 - 정상 종료
 */
-int quit_room(int user_id)                        // 방 나가기
+int quit_room(int room_id, int user_id)                        // 방 나가기
 {
     int i;
-    int current = online_users[user_id].cur_room;
 
-    for(i = 0; i < room_list[current].num_of_mem; i++)
+    for(i = 0; i < room_list[room_id].num_of_mem; i++)
     {
-        if(room_list[current].member_list[i] == online_users[user_id].user_id)
+        if(room_list[room_id].member_list[i] == online_users[user_id].user_id)
         {
-            for(; i < room_list[current].num_of_mem; i++)
+            for(; i < room_list[room_id].num_of_mem; i++)
             {
-                room_list[current].member_list[i] = room_list[current].member_list[i + 1];
+                room_list[room_id].member_list[i] = room_list[room_id].member_list[i + 1];
             }
 
-            room_list[current].num_of_mem--;
+            room_list[room_id].num_of_mem--;
             break;
         }
     }

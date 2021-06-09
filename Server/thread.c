@@ -122,7 +122,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 		{
 			if(!GQCS)	
 			{
-				error_handling(IOCP_ERROR);
+				error_handling(IOCP_ERROR + OFFSET);
 			}
 			if(online_users[handleInfo->user_index].is_online)
 			{

@@ -6,17 +6,22 @@ void packet_construct(int user_id, int io_byte)     // 스레드간 동기화 �
     int rest_byte = io_byte;
     char *p = online_users[user_id].memberInfo.exOver->buffer;
     int packet_size = 0;
+    short size, prev_size;
+
+    memcpy(&prev_size, online_users[user_id].memberInfo.packet_buf, sizeof(short));
 
     if(online_users[user_id].memberInfo.prev_size != 0)    // 재조립을 기다리는 패킷 존재 유무
     {
-        packet_size = online_users[user_id].memberInfo.packet_buf[0];  // 재조립 패킷의 크기
+        packet_size = prev_size;  // 재조립 패킷의 크기
     }
 
     while(rest_byte > 0)    // IOCP 버퍼에 남은 데이터가 없어질때까지 
     {
+        memcpy(&size, p, sizeof(short));
+
         if(packet_size == 0)
         {
-            packet_size = p[0];
+            packet_size = size;
         }
             
         if(packet_size <= rest_byte + online_users[user_id].memberInfo.prev_size)  // 남은 데이터로 패킷 완성이 가능한가?
@@ -43,7 +48,7 @@ void packet_construct(int user_id, int io_byte)     // 스레드간 동기화 �
 
 int packet_handler(int user_id, char *packet_buffer)
 {
-    switch (packet_buffer[1])
+    switch (packet_buffer[2])
     {
     case REGISTER:
 #if DEBUG
@@ -86,31 +91,38 @@ int packet_handler(int user_id, char *packet_buffer)
 #if DEBUG
         printf("Leave Request from ID %d\n", user_id);
 #endif
-        quit_room(user_id);
+        packet_quit* packet_5 = (packet_quit*)packet_buffer;
+        char buf[MAX_SIZE];
+        quit_room(packet_5->room_id, user_id);
+        strcpy(buf, online_users[user_id].id);
+        strcat(buf, "가 퇴장하였습니다.");
+        echo_message(user_id, packet_5->room_id, buf);
         break;
 
     case CHAT:
 #if DEBUG
         printf("Echo Request from ID %d\n", user_id);
 #endif
-        packet_chat* packet_5 = (packet_chat*)packet_buffer;
-        echo_message(user_id, packet_5->room_id, packet_5->buf);
+        packet_chat* packet_6 = (packet_chat*)packet_buffer;
+        echo_message(user_id, packet_6->room_id, packet_6->buf);
         break;
 
     case BLOCK:
 #if DEBUG
         printf("Block Request from ID %d\n", user_id);
 #endif
-        packet_block* packet_6 = (packet_block*)packet_buffer;
-        add_block_list(user_id, packet_6->user_name);
+        packet_block* packet_7 = (packet_block*)packet_buffer;
+        add_block_list(user_id, packet_7->user_name);
         break;
-    
+    case ROOMINFO:
+        break;
+
     case MAKEROOM:
 #if DEBUG
         printf("MakeRoom Request from ID %d\n", user_id);
 #endif
-        packet_makeroom* packet_7 = (packet_makeroom*)packet_buffer;
-        make_room(user_id, packet_7->room_name);
+        packet_makeroom* packet_8 = (packet_makeroom*)packet_buffer;
+        make_room(user_id, packet_8->room_name);
         break;
     
     }
@@ -129,15 +141,18 @@ int packet_send(int user_id, char *packet)
 #endif
     char *buf = (char*)packet;
     member *target = &online_users[user_id];
+    short size;
     LPPER_IO_DATA new;
+
+    memcpy(&size, buf, sizeof(short));
 
     new = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
     new->rwMode = WRITE;
     new->wsaBuf.buf = new->buffer;
-    new->wsaBuf.len = buf[0];
+    new->wsaBuf.len = size;
 
     memset(&new->overlapped, 0x00, sizeof(OVERLAPPED));
-    memcpy(new->buffer, buf, buf[0]);
+    memcpy(new->buffer, buf, size);
 
     if(WSASend(target->memberInfo.s, &new->wsaBuf, 1, NULL, 0, &new->overlapped, NULL) == SOCKET_ERROR)
     {

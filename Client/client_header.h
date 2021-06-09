@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <winSock2.h>
+#include <process.h>
+#include <windows.h>
 
 #define MAX_SIZE 100
 #define ID_SIZE 21
@@ -24,6 +26,17 @@
 #define PACKET_SIZE 1024
 #define READ	3
 #define	WRITE	5
+#define TITLE   77
+#define LOBBY   78
+
+#define SELECT  13
+#define ESC     27
+#define UP      72
+#define DOWN    80
+#define LEFT    75
+#define RIGHT   77
+
+#define CLEAR system("cls")
 
 /* error codes */
 #define OFFSET          10  // errno 개수에 따라 변경......
@@ -34,10 +47,9 @@
 #define DATA_DUPLICATE  -OFFSET + 4
 #define IOCP_ERROR      -OFFSET + 5
 
-typedef struct    // server socket info
+typedef struct    // socket info
 {
     SOCKET hServSock;
-    SOCKADDR_IN ServAdr;
 } PER_HANDLE_DATA, * LPPER_HANDLE_DATA;
 
 typedef struct    // buffer info
@@ -68,9 +80,6 @@ typedef struct _member
     int block_list[MAX_SIZE];
 } member;
 
-int user_main_thread(port);
-DWORD WINAPI WorkerThread(LPVOID CompletionPortIO);     // worker thread
-
 static const char* ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
     "buffer overflow",
     "search error",
@@ -79,3 +88,27 @@ static const char* ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
     "data duplicated",
     "IOCP error"
 };
+
+member user;
+int menu_pointer;
+int chat_pointer;
+
+int user_main_thread(int port);
+DWORD WINAPI WorkerThread(LPVOID CompletionPortIO);     // worker thread
+
+void packet_construct(int io_byte, member *recieved);
+int packet_send(SOCKET s, char *packet);
+
+void init_console(void);
+int title(void);
+void lobby(void);
+char *login(int select);
+char *reg_session(int select);
+void chat_window(void);
+int move_cursor(void);
+void set_cursor_view(bool set);
+void print_on_xy(int x, int y, char* buf);
+void move_to_xy(int x, int y);
+
+int error_handling(int err);
+void crit_error_handling(char* err_message);

@@ -1,5 +1,4 @@
 #include "server_header.h"
-
 /*
     추가해야 할 패킷
         - ...
@@ -11,7 +10,7 @@
 */
 
 // PACKET TYPE DEFINE
-
+#define QUIT		0		// 여기에 넣어두는 편이 보기 수월할거라 생각해서 추가해두겠습니다.
 #define REGISTER    1
 #define LOGIN       2
 #define LOGOUT      3
@@ -27,7 +26,7 @@
 // PACKET TYPE REGISTER
 typedef struct CS_packet_register
 {
-    char size;
+    short size;
     char type;
     char id[ID_SIZE];
     char pw[PW_SIZE];
@@ -40,7 +39,7 @@ typedef struct CS_packet_register
 */
 typedef struct SC_packet_registered
 {
-    char size;
+    short size;
     char type;
     int accept;
 
@@ -49,7 +48,7 @@ typedef struct SC_packet_registered
 // PACKET TYPE LOGIN
 typedef struct CS_packet_login_
 {
-    char size;
+    short size;
     char type;
     char id[ID_SIZE];
     char pw[PW_SIZE];
@@ -58,7 +57,7 @@ typedef struct CS_packet_login_
 
 typedef struct SC_packet_login_accept
 {
-    char size;
+    short size;
     char type;
     bool accept;
     int user_id;    // 서버에서 할당한 online_users[] index 클라이언트에게 전달
@@ -68,7 +67,7 @@ typedef struct SC_packet_login_accept
 // PACKET TYPE LOGOUT
 typedef struct CS_packet_logout_
 {
-    char size;
+    short size;
     char type;
     int id;
 
@@ -76,7 +75,7 @@ typedef struct CS_packet_logout_
 
 typedef struct SC_packet_logout_accept
 {
-    char size;
+    short size;
     char type;
     bool accept;
 
@@ -85,7 +84,7 @@ typedef struct SC_packet_logout_accept
 // PACKET TYPE ENTER
 typedef struct CS_packet_enter
 {
-    char size;
+    short size;
     char type;
     int room_id;
     
@@ -93,7 +92,7 @@ typedef struct CS_packet_enter
 
 typedef struct SC_packet_enter
 {
-    char size;
+    short size;
     char type;
     bool accept;    // 정원 초과일 경우 요청한 클라이언트에게만 실패했다고 전송
     int room_id;
@@ -104,7 +103,7 @@ typedef struct SC_packet_enter
 // PACKET TYPE LEAVE
 typedef struct CS_packet_leave
 {
-    char size;
+    short size;
     char type;
     int room_id;
 
@@ -112,7 +111,7 @@ typedef struct CS_packet_leave
 
 typedef struct SC_packet_leave
 {
-    char size;
+    short size;
     char type;
     int room_id;
     char user_name[ID_SIZE];
@@ -122,7 +121,7 @@ typedef struct SC_packet_leave
 // PACKET TYPE CHAT
 typedef struct CS_packet_chat
 {
-    char size;
+    short size;
     char type;
     int room_id;
     char buf[BUF_SIZE];
@@ -131,7 +130,7 @@ typedef struct CS_packet_chat
 
 typedef struct SC_packet_chat
 {
-    char size;
+    short size;
     char type;
     char user_name[ID_SIZE];    // 채팅 발신자
     char buf[BUF_SIZE];
@@ -142,7 +141,7 @@ typedef struct SC_packet_chat
 
 typedef struct CS_packet_block
 {
-    char size;
+    short size;
     char type;
     char user_name[ID_SIZE];
 
@@ -150,7 +149,7 @@ typedef struct CS_packet_block
 
 typedef struct SC_packet_blocked
 {
-    char size;
+    short size;
     char type;
     bool accept;    // 존재하는 아이디가 아닐 경우 false
 
@@ -158,9 +157,16 @@ typedef struct SC_packet_blocked
 
 // PACKET TYPE ROOMINFO
 
+typedef struct CS_packet_request
+{
+    short size;
+    char type;
+
+}packet_request;    // C -> S 로그인 세션 완료 후 방 정보 요청
+
 typedef struct SC_packet_roominfo
 {
-    char size;
+    short size;
     char type;
     int room_member[MAX_SIZE];  // 방에 있는 사람의 수 || index -> room_member_num
     // 방 이름까지 보내기엔 구조체가 너무 커짐 -> 대안...? 자신이 들어가 있는 방의 이름과 id를 클라이언트에 저장
@@ -171,7 +177,7 @@ typedef struct SC_packet_roominfo
 
 typedef struct CS_packet_makeroom
 {
-    char size;
+    short size;
     char type;
     int user_id;
     char room_name[MAX_SIZE];
@@ -180,7 +186,7 @@ typedef struct CS_packet_makeroom
 
 typedef struct SC_packet_complete	// 위에 구조체랑 재정의 오류 나서 임의로 이름 바꿨습니다!
 {
-    char size;
+    short size;
     char type;
     bool accept;
     int room_id;

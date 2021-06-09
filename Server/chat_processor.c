@@ -47,7 +47,10 @@ int echo_message(int user_id, int room_number, char *message)
             {
                 if(online_users[target_id].is_online)
                 {
-                    packet_send(target_id, &packet);
+                    if(target_id != user_id)
+                    {
+                        packet_send(target_id, &packet);
+                    }
                 }
                 
             }
