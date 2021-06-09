@@ -34,6 +34,12 @@
 #define DATA_DUPLICATE  -OFFSET + 4
 #define IOCP_ERROR      -OFFSET + 5
 
+typedef struct    // server socket info
+{
+    SOCKET hServSock;
+    SOCKADDR_IN ServAdr;
+} PER_HANDLE_DATA, * LPPER_HANDLE_DATA;
+
 typedef struct    // buffer info
 {
     OVERLAPPED overlapped;
@@ -62,4 +68,14 @@ typedef struct _member
     int block_list[MAX_SIZE];
 } member;
 
+int user_main_thread(port);
 DWORD WINAPI WorkerThread(LPVOID CompletionPortIO);     // worker thread
+
+static const char* ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
+    "buffer overflow",
+    "search error",
+    "function error",
+    "I/O failure",
+    "data duplicated",
+    "IOCP error"
+};
