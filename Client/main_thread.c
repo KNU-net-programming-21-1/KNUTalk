@@ -38,7 +38,7 @@ int user_main_thread(int port)
 
 	memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family = AF_INET;
-	servAdr.sin_addr.s_addr = htonl("127.0.0.1");
+	servAdr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	servAdr.sin_port = htons(port);
 
     ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
