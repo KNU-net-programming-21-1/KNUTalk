@@ -36,7 +36,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
         
 #if DEBUG == 1
         printf("Room Info\n");
-        for (i = 0; i < find_empty_room(); i++)
+        for (i = 1; i < find_empty_room(); i++)
         {
             printf("Room ID: %d, Room Name: %s\n",i,room_list[i].room_name);
         }
@@ -46,6 +46,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
 
         packet.accept = true;
         packet.room_id = id;
+        strcpy(packet.room_name, name);
         packet_send(user_id, &packet);
 
         return id;
@@ -165,13 +166,14 @@ int room_info_request(int user_id)
     packet_roominfo packet;
     packet.type = ROOMINFO;
     packet.size = sizeof(packet_roominfo);
-
-    for(i = 0; i < MAX_SIZE; i++)
+    
+    for(i = 1; i < MAX_SIZE; i++)
     {
-        packet.room_member[i] = room_list[i].num_of_mem; 
+        packet.room_id = i;
+        packet.member_count = room_list[i].num_of_mem;
+        strcpy(packet.room_name, room_list[i].room_name);
+        packet_send(user_id, &packet);
     }
-
-    packet_send(user_id, &packet);
 
     return 0;
 }
@@ -186,7 +188,7 @@ int current_room_num(void)                              // 현재 존재하는 �
 
     // critical section
 
-    for(i = 0, ret = 0; i < MAX_SIZE; i++)
+    for(i = 1, ret = 0; i < MAX_SIZE; i++)
     {
         if(room_list[i].num_of_mem != -1)
         {
@@ -208,7 +210,7 @@ int find_empty_room(void)
 {
     int ret;
 
-    for(ret = 0; ret < MAX_ROOM_SIZE; ret++)
+    for(ret = 1; ret < MAX_ROOM_SIZE; ret++)
     {
         if(room_list[ret].num_of_mem == -1)
         {

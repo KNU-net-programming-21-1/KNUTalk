@@ -2,8 +2,6 @@
 #include "cln_packet_header.h"
 #include <conio.h>
 
-#define ROW 60
-#define COL 65
 #define CURSOR_SIZE 1
 
 
@@ -12,6 +10,7 @@ void init_console(void)
     char buf[MAX_SIZE];
     sprintf(buf, "mode con cols=%d lines=%d", COL, ROW);
     system(buf);
+    system("title KNUTALK");
     set_cursor_view(FALSE);
     CLEAR;
 }
@@ -91,10 +90,76 @@ int title(void)
     }
 }
 
-void lobby(void)
+int lobby(void)
 {
+    int cursor = FALSE;
+    int room_select = 1;
+    int room_count = 0;
+    int i;
 
+    printf("ID / NAME                                접속자/최대인원\n");
+    for(i = 1; i < MAX_SIZE; i++)
+    {
+        if(room_info[i].name[0] == NULL)
+        {
+            break;
+        }
+        printf("%3d%20s                  %6d/%6d\n", i, room_info[i].name, room_info[i].member_count, MAX_SIZE);
+        room_count++;
+    }
+
+    print_on_xy(0, 56, "방에 참가하기(Enter)");
+    print_on_xy(0, 58, "새로운 방 생성(M/m)");
+    print_on_xy(50, 56, "새로고침(F5)");
+    print_on_xy(50, 58, "로그아웃(ESC)");
+    print_on_xy(58, room_select, "<-");
+    for (; cursor != SELECT; )
+    {
+        cursor = move_cursor();
+        switch (cursor)
+        {
+        case UP:
+            if (room_select > 1)
+            {
+                print_on_xy(55, room_select, "  ");
+                room_select = room_select - 1;
+                print_on_xy(55, room_select, "<-");
+            }
+            break;
+        case DOWN:
+            if (room_select < room_count)
+            {
+                print_on_xy(55, room_select, "  ");
+                room_select = room_select + 1;
+                print_on_xy(55, room_select, "<-");
+            }
+            break;
+        case REFRESH:
+            return REFRESH + MAX_SIZE;
+        case SELECT:
+            if(room_count != 0)
+            {
+                return room_select;
+            }
+            cursor = FALSE;
+            break;
+        case ESC:
+            return QUIT;
+        case 'M':
+            return MAKEROOM + MAX_SIZE;
+        case 'm':
+            return MAKEROOM + MAX_SIZE;
+        }
+    }
+    return room_select;
 }
+
+/*printf("\n*********************\n\n");
+printf("LOGOUT < 3 >\t\t");
+printf("ENTER < 4 >\t");
+printf("MAKEROOM < 9 >\t");
+printf("\n*********************\n\n");
+printf("menu : ");*/
 
 char* login(int select)
 {
@@ -197,15 +262,15 @@ char* reg_session(int select)
         packet->id[1] = '\0';
     }
 
-    scanf_s("%s", 20, packet->id);
+    scanf("%s", &packet->id[1]);
     printf("\n사용할 비밀번호를 입력해주세요 || ");
-    scanf_s("%s", 20, packet->pw);
+    scanf("%s", packet->pw);
     printf("\n서버와 통신 중 입니다...\n");
     
     return (char*)packet;
 }
 
-void chat_window(void)
+int chat_window(void)
 {
 
 }
@@ -231,6 +296,8 @@ int move_cursor(void)
                         return LEFT;
                     case RIGHT:
                         return RIGHT;
+                    case REFRESH:
+                        return REFRESH;
                     default:
                         return c;
                 }

@@ -1,4 +1,4 @@
-#include "client_header.h"
+﻿#include "client_header.h"
 #include "cln_packet_header.h"
 
 int user_main_thread(int port)
@@ -143,30 +143,23 @@ int user_main_thread(int port)
             }
         }
         
-        CLEAR;
-        init_console();
-        move_to_xy(0, 0);
         packet_request request;
         request.size = sizeof(packet_request);
         request.type = ROOMINFO;
         packet_send(hSocket, &request);
-        while(menu_pointer == ROOMINFO);    // 로그인 후 서버가 방 정보 보내줄때까지 대기, 방 정보 패킷 수신하면 로비화면으로 넘어가 방 목록을 출력
-
-        /* LOBBY 구현 필요 */
+        menu_pointer = LOBBY;
 
         for(; menu_pointer == LOBBY; )
         {
-            printf("\n*********************\n\n");
-            printf("LOGOUT < 3 >\t\t");
-            printf("ENTER < 4 >\t");
-            printf("MAKEROOM < 9 >\t");
-            printf("\n*********************\n\n");
-            printf("menu : ");
-            scanf(" %d", &menu);
+            CLEAR;
+            init_console();
+            move_to_xy(0, 0);
+
+            menu = lobby();
 
             switch (menu)
             {
-                case LOGOUT:
+                case QUIT:
                     menu_pointer = LOGOUT;
                     CLEAR;
                     packet_logout* CS_logout = (packet_logout*)malloc(sizeof(packet_logout));
@@ -174,21 +167,30 @@ int user_main_thread(int port)
                     CS_logout->size = sizeof(packet_logout);
                     CS_logout->type = LOGOUT;
                     packet_send(hSocket, CS_logout);
+                    menu_pointer = QUIT;
                     break;
-                
-                case ENTER:
+
+                case MAKEROOM + MAX_SIZE:
+                    CLEAR;
+                    set_console_size(COL / 2, ROW / 2);
+                    menu_pointer = MAKEROOM;
+                    packet_makeroom *CS_makeroom = (packet_makeroom*)malloc(sizeof(packet_makeroom));
+                    CS_makeroom->size = sizeof(packet_makeroom);
+                    CS_makeroom->type = MAKEROOM;
+                    CS_makeroom->user_id = user.user_id;
+                    
+                    printf("생성할 방의 이름을 입력해주세요\n->");
+                    scanf("%s", CS_makeroom->room_name);
+                    packet_send(hSocket, CS_makeroom);
+                    while(menu_pointer == MAKEROOM);
+                    break;
+                case REFRESH + MAX_SIZE:
+                    packet_send(hSocket, &request);
+                    break;
+                default:
                     menu_pointer = ENTER;
                     CLEAR;
                     packet_enter CS_enter;
-                    break;
-
-                case MAKEROOM:
-                    CLEAR;
-                    packet_makeroom CS_makeroom;
-                    break;
-                
-                default:
-                    printf("잘못된 선택입니다. 다시 메뉴를 선택해주세요.\n");
                     break;
             }        
         }    
@@ -196,7 +198,14 @@ int user_main_thread(int port)
         {
             break;
         }
+
+        for (; menu_pointer == ENTER; )
+        {
+            menu = chat_window();
+        }
 	}
+
+    
 	return 0;
 }
 
@@ -226,12 +235,12 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 
 		if(ioInfo->rwMode == READ)	// recieved data
 		{
-#ifdef DEBUG
+#if DEBUG == 1
 			printf("Received Packet Len: %d\n",bytesTrans);
 #endif
 			// 받은 패킷 조립 & 처리
             // 처리에 따른 UI draw
-            packet_construct(bytesTrans, ioInfo);
+            packet_construct(bytesTrans);
 			WSARecv(socket,	&(ioInfo->wsaBuf), 1, NULL, &flags, &(ioInfo->overlapped), NULL);
 		}
 		else if(ioInfo->rwMode == WRITE)

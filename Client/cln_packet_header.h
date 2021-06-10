@@ -168,8 +168,9 @@ typedef struct SC_packet_roominfo
 {
     short size;
     char type;
-    char room_member[MAX_SIZE];  // 방에 있는 사람의 수 || index -> room_member_num
-    // 방 이름까지 보내기엔 구조체가 너무 커짐 -> 대안...? 자신이 들어가 있는 방의 이름과 id를 클라이언트에 저장
+    char room_id;
+    char member_count;
+    char room_name[MAX_SIZE];
 
 }packet_roominfo;
 
@@ -190,5 +191,6 @@ typedef struct SC_packet_complete	// 위에 구조체랑 재정의 오류 나서
     char type;
     bool accept;
     char room_id;
+    char room_name[MAX_SIZE];
 
 }packet_complete;       // S -> C 방 생성 완료 여부 및 room_id

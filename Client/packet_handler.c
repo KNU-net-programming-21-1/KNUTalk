@@ -1,4 +1,4 @@
-#include "client_header.h"
+﻿#include "client_header.h"
 #include "cln_packet_header.h"
 
 void packet_construct(int io_byte)
@@ -107,20 +107,25 @@ int packet_handler(char *packet)
         break;
     
     case ROOMINFO:
-        CLEAR;
-        int i;
         packet_roominfo* packet_8 = (packet_roominfo*)packet;
-        for(i = 0; i < MAX_SIZE; i++)
-        {
-            if(packet_8->room_member[i] != -1)
-            {
-                printf("ROOM ID : %d || %d/%d\n", i, packet_8->room_member[i], MAX_SIZE);
-            }
-        }
-        menu_pointer = LOBBY;
+        room_info[packet_8->room_id].member_count = packet_8->member_count;
+        strcpy(room_info[packet_8->room_id].name, packet_8->room_name);
         break;
     
     case MAKEROOM:
+        CLEAR;
+        packet_complete* packet_9 = (packet_complete*)packet;
+        if(packet_9->accept)
+        {
+            strcpy(room_info[packet_9->room_id].name, packet_9->room_name);
+            room_info[packet_9->room_id].member_count = 0;
+            print_on_xy(0, 57, "방이 생성되었습니다.");
+        }
+        else
+        {
+            print_on_xy(0, 57, "방 생성에 실패하였습니다.");
+        }
+        menu_pointer = LOBBY;
         break;
     }
     return 0;

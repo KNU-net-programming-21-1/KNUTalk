@@ -26,15 +26,21 @@
 #define PACKET_SIZE 1024
 #define READ	3
 #define	WRITE	5
+
+/* For UI */
+#define ROW 60
+#define COL 65
 #define TITLE   77
 #define LOBBY   78
 
+/* Cursor move */
 #define SELECT  13
 #define ESC     27
 #define UP      72
 #define DOWN    80
 #define LEFT    75
 #define RIGHT   77
+#define REFRESH 63
 
 #define CLEAR system("cls")
 
@@ -80,6 +86,12 @@ typedef struct _member
     int block_list[MAX_SIZE];
 } member;
 
+typedef struct _room
+{
+    char name[MAX_SIZE];
+    int member_count;
+}room;
+
 static const char* ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
     "buffer overflow",
     "search error",
@@ -90,21 +102,23 @@ static const char* ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
 };
 
 member user;
+room room_info[MAX_SIZE];
 int menu_pointer;
 int chat_pointer;
 
 int user_main_thread(int port);
 DWORD WINAPI WorkerThread(LPVOID CompletionPortIO);     // worker thread
 
-void packet_construct(int io_byte, member *recieved);
+void packet_construct(int io_byte);
 int packet_send(SOCKET s, char *packet);
 
 void init_console(void);
+void set_console_size(int col, int row);
 int title(void);
-void lobby(void);
+int lobby(void);
 char *login(int select);
 char *reg_session(int select);
-void chat_window(void);
+int chat_window(void);
 int move_cursor(void);
 void set_cursor_view(bool set);
 void print_on_xy(int x, int y, char* buf);
