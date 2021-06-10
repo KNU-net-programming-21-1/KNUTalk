@@ -6,7 +6,7 @@ int main(void)
 {
 	int port;
 
-#if DEBUG == 0    
+#if DEBUG == 1    
 	scanf("%d", &port);
 #else
 	port = 65535;

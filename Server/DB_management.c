@@ -34,6 +34,8 @@ void init_server(){
 		registered_users[i].user_id = -1;
         online_users[i].user_id = -1;
         room_list[i].num_of_mem = -1;
+        online_users[i].memberInfo.exOver = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
+        online_users[i].memberInfo.sendExOver = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
     }
 
     read_from_file();

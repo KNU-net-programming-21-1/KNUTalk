@@ -93,8 +93,9 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
     {
         // critical section
 
-        room_list[room_id].member_list[member_count] = online_users[user_id].user_id;
+        room_list[room_id].member_list[member_count] = user_id;
         room_list[room_id].num_of_mem++;        
+        online_users[user_id].cur_room = room_id;
         strcpy(packet.user_name, online_users[user_id].id);
         packet.accept = true;
         packet.room_id = room_id;
@@ -122,20 +123,20 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
 int quit_room(int room_id, int user_id)                        // 방 나가기
 {
     int i;
-
+    
     for(i = 0; i < room_list[room_id].num_of_mem; i++)
     {
-        if(room_list[room_id].member_list[i] == online_users[user_id].user_id)
+        if(room_list[room_id].member_list[i] == user_id)
         {
             for(; i < room_list[room_id].num_of_mem; i++)
             {
                 room_list[room_id].member_list[i] = room_list[room_id].member_list[i + 1];
             }
-
             room_list[room_id].num_of_mem--;
             break;
         }
     }
+    online_users[user_id].cur_room = 0;
 
     return 0;
 }
@@ -166,13 +167,21 @@ int room_info_request(int user_id)
     packet_roominfo packet;
     packet.type = ROOMINFO;
     packet.size = sizeof(packet_roominfo);
-    
+    packet.room_id = 0;
+    packet.member_count = 0;
+    strcpy(packet.room_name, room_list[0].room_name);
+
+    packet_send(user_id, &packet);
+
     for(i = 1; i < MAX_SIZE; i++)
     {
-        packet.room_id = i;
-        packet.member_count = room_list[i].num_of_mem;
-        strcpy(packet.room_name, room_list[i].room_name);
-        packet_send(user_id, &packet);
+        if (room_list[i].num_of_mem != -1)
+        {
+            packet.room_id = i;
+            packet.member_count = room_list[i].num_of_mem;
+            strcpy(packet.room_name, room_list[i].room_name);
+            packet_send(user_id, &packet);
+        }
     }
 
     return 0;

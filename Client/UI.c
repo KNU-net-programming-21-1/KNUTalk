@@ -269,9 +269,70 @@ char* reg_session(int select)
     return (char*)packet;
 }
 
-int chat_window(void)
+char* chat_window(void)
 {
+    int cursor = FALSE;
+    int i;
+    char buf[BUF_SIZE];
+    packet_chat* packet;
 
+    set_cursor_view(TRUE);
+    print_on_xy(1, 56, "->");
+    move_to_xy(4, 56);
+    for(i = 0; i < BUF_SIZE; )
+    {
+        cursor = move_cursor();
+        switch (cursor)
+        {
+        case SELECT:
+            if(i == 0)
+            {
+                cursor = FALSE;
+            }
+            else
+            {
+                packet = (packet_chat*)malloc(sizeof(packet_chat));
+                packet->room_id = user.cur_room;
+                packet->size = sizeof(packet_chat);
+                packet->type = CHAT;
+                if(i == BUF_SIZE)
+                {
+                    buf[i - 1] = '\0';
+                }
+                else
+                {
+                    buf[i] = '\0';
+                }
+                strcpy(packet->buf, buf);
+                print_on_xy(1, 56, "->                                                                                           ");
+                move_to_xy(4, 56);
+                return (char*)packet;
+            }
+            break;
+
+        case ESC:
+            return NULL;
+
+        case DELETE:
+            if (i >= 0)
+            {
+                if (i != 0)
+                {
+                    i--;
+                }
+                print_on_xy(4 + i, 56, " ");
+                move_to_xy(4 + i, 56);
+                buf[i] = '\0';
+            }
+            break;
+
+        default:
+            putc(cursor, stdout);
+            buf[i] = cursor;
+            i++;
+            break;
+        }
+    }
 }
 
 int move_cursor(void)
@@ -301,11 +362,15 @@ int move_cursor(void)
                         return c;
                 }
             }
-            else if(c == 13)
+            else if(c == DELETE)
+            {
+                return DELETE;
+            }
+            else if(c == SELECT)
             {
                 return SELECT;
             }
-            else if(c == 27)
+            else if(c == ESC)
             {
                 return ESC;
             }

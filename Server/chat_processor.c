@@ -38,23 +38,30 @@ int echo_message(int user_id, int room_number, char *message)
     packet.type = CHAT;
     packet.size = sizeof(packet_echo);
 
-    for(i = 0; i < room_list[room_number].num_of_mem; i++)
+    for (i = 0; i < room_list[room_number].num_of_mem; i++)
     {
         target_id = room_list[room_number].member_list[i];
-        for(j = 0; j < online_users[target_id].blocked_user_num; j++)
+        if (online_users[target_id].blocked_user_num != 0)
         {
-            if(user_id != online_users[target_id].block_list[j])
+            for (j = 0; j < online_users[target_id].blocked_user_num; j++)
             {
-                if(online_users[target_id].is_online)
+                if (user_id != online_users[target_id].block_list[j])
                 {
-                    if(target_id != user_id)
+                    if (online_users[target_id].is_online)
                     {
                         packet_send(target_id, &packet);
                     }
                 }
-                
             }
         }
+        else
+        {
+            if (online_users[target_id].is_online)
+            {
+                packet_send(target_id, &packet);
+            }
+        }
+        
     }
 
     return 0;

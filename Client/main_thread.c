@@ -8,6 +8,7 @@ int user_main_thread(int port)
 	HANDLE hComPort;	
 	SYSTEM_INFO sysInfo;
 	LPPER_IO_DATA ioInfo;
+    LPPER_IO_DATA send_ioInfo;
     LPPER_HANDLE_DATA handleInfo;
 
 	SOCKET hSocket;
@@ -48,6 +49,11 @@ int user_main_thread(int port)
     ioInfo->wsaBuf.buf = ioInfo->buffer;
     ioInfo->rwMode = READ;
 
+    send_ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
+    memset(&(send_ioInfo->overlapped), 0, sizeof(OVERLAPPED));
+    send_ioInfo->wsaBuf.len = BUF_SIZE;
+    send_ioInfo->wsaBuf.buf = send_ioInfo->buffer;
+    send_ioInfo->rwMode = READ;
     
 	if(WSAConnect(hSocket, (SOCKADDR*)&servAdr, sizeof(servAdr), NULL, NULL, NULL, NULL)
             == SOCKET_ERROR)
@@ -65,6 +71,7 @@ int user_main_thread(int port)
 
     user.memberInfo.s = hSocket;
     user.memberInfo.exOver = ioInfo;
+    user.memberInfo.sendExOver = send_ioInfo;
 
     if(WSARecv(hSocket, &(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL) 
                 == SOCKET_ERROR)
@@ -168,7 +175,7 @@ int user_main_thread(int port)
                     CS_logout->size = sizeof(packet_logout);
                     CS_logout->type = LOGOUT;
                     packet_send(hSocket, CS_logout);
-                    menu_pointer = QUIT;
+                    while (menu_pointer == LOGOUT);
                     break;
 
                 case MAKEROOM + MAX_SIZE:
@@ -191,22 +198,51 @@ int user_main_thread(int port)
                 default:
                     menu_pointer = ENTER;
                     CLEAR;
-                    packet_enter CS_enter;
+                    packet_enter* CS_enter = (packet_enter*)malloc(sizeof(packet_enter));
+                    CS_enter->room_id = menu;
+                    CS_enter->size = sizeof(packet_enter);
+                    CS_enter->type = ENTER;
+                    packet_send(hSocket, CS_enter);
+                    while(menu_pointer == ENTER);
+                    CLEAR;
+                    set_console_size(100, COL);
                     break;
-            }        
+            }
+            for (; menu_pointer == ROOM; )
+            {
+                packet_chat* chat_buf;
+                chat_buf = (packet_chat*)chat_window();
+                menu_pointer = CHAT;
+
+                if(chat_buf != NULL)
+                {
+                    packet_send(hSocket, chat_buf);
+                    while(menu_pointer == CHAT);
+                    free(chat_buf);
+                }
+                else
+                {
+                    menu_pointer = LOBBY;
+                    chat_pointer = 0;
+                    packet_quit* CS_quit = (packet_quit*)malloc(sizeof(packet_quit));
+                    CS_quit->room_id = user.cur_room;
+                    CS_quit->size = sizeof(packet_quit);
+                    CS_quit->type = LEAVE;
+                    packet_send(hSocket, CS_quit);
+                    free(CS_quit);
+                }
+
+                if(menu_pointer == LOBBY)
+                {
+                    break;
+                }
+            }       
         }    
         if(menu_pointer == QUIT)
         {
             break;
         }
-
-        for (; menu_pointer == ENTER; )
-        {
-            menu = chat_window();
-        }
 	}
-
-    
 	return 0;
 }
 
@@ -228,7 +264,6 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 		if(!GQCS || !bytesTrans)
 		{
 			// 서버와의 연결 끊김
-            printf("서버와의 연결이 원활하지 않습니다.\n");
             closesocket(socket);
             menu_pointer = QUIT;
 			break;
@@ -246,7 +281,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 		}
 		else if(ioInfo->rwMode == WRITE)
 		{
-			free(ioInfo);
+			//free(ioInfo);
 		}
 		
 	}

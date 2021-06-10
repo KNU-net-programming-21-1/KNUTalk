@@ -9,7 +9,7 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 /* for debugging*/
-#define DEBUG 1                                     // for debug , 0 -> normal
+#define DEBUG 0                                     // for debug , 0 -> normal
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -29,12 +29,15 @@
 #define	WRITE	5
 
 /* For UI */
+#define LINE_SIZE 20
 #define ROW 60
 #define COL 65
 #define TITLE   77
 #define LOBBY   78
+#define ROOM    79
 
 /* Cursor move */
+#define DELETE  8
 #define SELECT  13
 #define ESC     27
 #define UP      72
@@ -71,6 +74,7 @@ typedef struct _member_info // 패킷 처리를 위한 구조체
 {
     SOCKET s;
     LPPER_IO_DATA exOver;   // IOCP buffer(overlapped 구조체 확장)
+    LPPER_IO_DATA sendExOver;
     char packet_buf[PACKET_SIZE];  // packet constructor buffer
     int prev_size;  // 이전에 받은 패킷의 크기
 } member_info;
@@ -104,6 +108,7 @@ static const char* ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
 
 member user;
 room room_info[MAX_SIZE];
+char chat_buffer[LINE_SIZE][ID_SIZE + BUF_SIZE];
 int menu_pointer;
 int chat_pointer;
 
@@ -117,9 +122,9 @@ void init_console(void);
 void set_console_size(int col, int row);
 int title(void);
 int lobby(void);
-char *login(int select);
-char *reg_session(int select);
-int chat_window(void);
+char* login(int select);
+char* reg_session(int select);
+char* chat_window(void);
 int move_cursor(void);
 void set_cursor_view(bool set);
 void print_on_xy(int x, int y, char* buf);

@@ -57,6 +57,7 @@ typedef struct _member_info // 패킷 처리를 위한 구조체
 {
     SOCKET s;
     LPPER_IO_DATA exOver;   // IOCP buffer(overlapped 구조체 확장)
+    LPPER_IO_DATA sendExOver;
     char packet_buf[PACKET_SIZE];  // packet constructor buffer
     int prev_size;  // 이전에 받은 패킷의 크기
 } member_info;

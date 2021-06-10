@@ -1,4 +1,4 @@
-#include "server_header.h"
+﻿#include "server_header.h"
 #include "packet_header.h"
 
 void packet_construct(int user_id, int io_byte)     // 스레드간 동기화 문제 생각할 필요
@@ -146,27 +146,25 @@ int packet_send(int user_id, char *packet)
     char *buf = (char*)packet;
     member *target = &online_users[user_id];
     short size;
-    LPPER_IO_DATA new;
+    LPPER_IO_DATA new = online_users[user_id].memberInfo.sendExOver;
 
     memcpy(&size, buf, sizeof(short));
 
-    new = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
+    /*new = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));*/
+
+    memset(&new->overlapped, 0x00, sizeof(OVERLAPPED));
+    memcpy(new->buffer, buf, size);
     new->rwMode = WRITE;
     new->wsaBuf.buf = new->buffer;
     new->wsaBuf.len = size;
 
-    memset(&new->overlapped, 0x00, sizeof(OVERLAPPED));
-    memcpy(new->buffer, buf, size);
-
-    if(WSASend(target->memberInfo.s, &new->wsaBuf, 1, NULL, 0, &new->overlapped, NULL) == SOCKET_ERROR)
+    if (WSASend(target->memberInfo.s, &(new->wsaBuf), 1, NULL, 0, &(new->overlapped), NULL) == SOCKET_ERROR)
     {
-        if(WSAGetLastError() != WSA_IO_PENDING)
+        if (WSAGetLastError() != WSA_IO_PENDING)
         {
-            logout(user_id);
-            closesocket(online_users[user_id].memberInfo.s);
             return error_handling(IOCP_ERROR + OFFSET);
         }
     }
-    
+
     return buf[0];
 }

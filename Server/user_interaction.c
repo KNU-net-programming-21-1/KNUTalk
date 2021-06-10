@@ -43,6 +43,7 @@ int logout(int user_id)                         // 서버에서 로그아웃
     packet.accept = true;
     packet.size = sizeof(packet_logout_accept);
     packet.type = LOGOUT;
+    quit_room(online_users[user_id].cur_room, user_id);
 
     registered_users[online_users[user_id].user_id].is_online = false;
     online_users[user_id].is_online = false;

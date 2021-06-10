@@ -6,7 +6,6 @@ int accept_thread(int port)
     WSADATA	wsaData;
 	HANDLE hComPort;	
 	SYSTEM_INFO sysInfo;
-	LPPER_IO_DATA ioInfo;
 	LPPER_HANDLE_DATA handleInfo;
 
 	SOCKET hServSock;
@@ -28,7 +27,6 @@ int accept_thread(int port)
     {
         _beginthreadex(NULL, 0, WorkerThread, (LPVOID)hComPort, 0, NULL);
     }
-
     /* Init accept socket */
 	if((hServSock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED))
                 == INVALID_SOCKET)
@@ -64,7 +62,7 @@ int accept_thread(int port)
 		for(i = 0; i < MAX_SIZE; i++)
 		{
 			empty_slot = LIMIT_REACHED;
-			if(online_users[i].user_id == -1)
+			if(online_users[i].is_online == false)
 			{
 				empty_slot = i;	// online_users 배열의 비어있는 부분에 새 연결 할당
 				break;			// 최대 동접자 수 초과할 경우...일단 보류 -> 대기 알리는 패킷전송, 로그아웃으로 빈자리 생길경우 스레드에 알려주는 기능, 메인 스레드는 새 연결 계속 받아서 대기 패킷 전송 함수 호출해야 함
@@ -86,16 +84,19 @@ int accept_thread(int port)
 
 			CreateIoCompletionPort((HANDLE)hClntSock, hComPort, (DWORD)handleInfo, 0);
 			
-			ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
-			memset(&(ioInfo->overlapped), 0, sizeof(OVERLAPPED));		
-			ioInfo->wsaBuf.len = BUF_SIZE;
-			ioInfo->wsaBuf.buf = ioInfo->buffer;
-			ioInfo->rwMode = READ;
+			memset(&(online_users[empty_slot].memberInfo.exOver->overlapped), 0, sizeof(OVERLAPPED));
+			online_users[empty_slot].memberInfo.exOver->wsaBuf.len = BUF_SIZE;
+			online_users[empty_slot].memberInfo.exOver->wsaBuf.buf = online_users[empty_slot].memberInfo.exOver->buffer;
+			online_users[empty_slot].memberInfo.exOver->rwMode = READ;
+			
+			memset(&(online_users[empty_slot].memberInfo.sendExOver->overlapped), 0, sizeof(OVERLAPPED));
+			online_users[empty_slot].memberInfo.sendExOver->wsaBuf.len = BUF_SIZE;
+			online_users[empty_slot].memberInfo.sendExOver->wsaBuf.buf = online_users[empty_slot].memberInfo.sendExOver->buffer;
+			online_users[empty_slot].memberInfo.sendExOver->rwMode = WRITE;
 			
 			online_users[empty_slot].memberInfo.s = hClntSock;
-			online_users[empty_slot].memberInfo.exOver = ioInfo;
 			online_users[empty_slot].is_online = true;
-			WSARecv(handleInfo->hClntSock,	&(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);	
+			WSARecv(handleInfo->hClntSock,	&(online_users[empty_slot].memberInfo.exOver->wsaBuf), 1, &recvBytes, &flags, &(online_users[empty_slot].memberInfo.exOver->overlapped), NULL);
 		}
 	}
 	return 0;
@@ -110,6 +111,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 	LPPER_IO_DATA ioInfo;
 	LPPER_HANDLE_DATA handleInfo;
 	DWORD flags = 0;
+	int error;
 	bool GQCS;
 
 	while(true)
@@ -121,14 +123,13 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 		{
 			if(!GQCS)	
 			{
-				error_handling(IOCP_ERROR + OFFSET);
+				error_handling(IOCP_ERROR + OFFSET); 
+				if (online_users[handleInfo->user_index].is_online)
+				{
+					logout(handleInfo->user_index);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우에도 유저 로그아웃 처리
+				}
+				closesocket(socket);
 			}
-			if(online_users[handleInfo->user_index].is_online)
-			{
-				logout(handleInfo->user_index);	// client가 로그아웃 패킷 전송 없이 종료되었을 경우에도 유저 로그아웃 처리
-			}
-			closesocket(socket);
-			free(ioInfo);
 			continue;
 		}
 
@@ -143,9 +144,8 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 		}
 		else if(ioInfo->rwMode == WRITE)
 		{
-			free(ioInfo);
+			//free(ioInfo);
 		}
-		
 	}
 		
 	return 0;
