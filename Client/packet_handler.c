@@ -51,71 +51,103 @@ int packet_handler(char *packet)
     switch (packet[2])
     {
     case REGISTER:
+    {
         CLEAR;
         packet_registered* packet_1 = (packet_registered*)packet;
-        if(packet_1->accept == true)
+        if (packet_1->accept == true)
         {
             printf("계정 등록에 성공하였습니다.\n");
             printf("enter키를 입력하여 타이틀로 돌아가기\n");
-            while(move_cursor() != SELECT);
+            while (move_cursor() != SELECT);
             menu_pointer = TITLE;
         }
-        else if(packet_1->accept == DATA_DUPLICATE)
+        else if (packet_1->accept == DATA_DUPLICATE)
         {
             menu_pointer = DATA_DUPLICATE;
         }
-        else if(packet_1->accept == DATA_FAILURE)
+        else if (packet_1->accept == DATA_FAILURE)
         {
             menu_pointer = DATA_FAILURE;
         }
         break;
-
+    }
     case LOGIN:
+    {
         CLEAR;
         packet_accept* packet_2 = (packet_accept*)packet;
-        if(packet_2->accept == true)
+        if (packet_2->accept == true)
         {
             user.user_id = packet_2->user_id;
             menu_pointer = ROOMINFO;
         }
-        else if(packet_2->accept == false)
+        else if (packet_2->accept == false)
         {
             menu_pointer = FALSE;
         }
         break;
-    
+    }
     case LOGOUT:
+    {
         CLEAR;
         packet_logout_accept* packet_3 = (packet_logout_accept*)packet;
-        if(packet_3->accept == true)
+        if (packet_3->accept == true)
         {
             menu_pointer == LOGOUT;
         }
         break;
-    
+    }
     case ENTER:
+    {
+     
+        packet_join* packet_4 = (packet_join*)packet;
+        if (packet_4->accept)
+        {
+            print_on_xy(0, 57, "방에 입장하였습니다.");
+        }
+        else
+        {
+            print_on_xy(0, 57, "방 입장에 실패하였습니다.");
+        }
         break;
-    
+    }
     case LEAVE:
+    {
 
+        packet_leave* packet_5 = (packet_leave*)packet;
         break;
-
+    }
     case CHAT:
+    {
+        packet_echo* packet_6 = (packet_chat*)packet;
         break;
-
+    }
     case BLOCK:
+    {
+
+        packet_blocked* packet_7 = (packet_blocked*)packet;
+        if (packet_7->accept)
+        {
+
+        }
+        else
+        {
+
+        }
+        //menu_pointer = 
         break;
-    
+    }
     case ROOMINFO:
+    {
         packet_roominfo* packet_8 = (packet_roominfo*)packet;
         room_info[packet_8->room_id].member_count = packet_8->member_count;
         strcpy(room_info[packet_8->room_id].name, packet_8->room_name);
         break;
-    
+    }
     case MAKEROOM:
+    {
         CLEAR;
         packet_complete* packet_9 = (packet_complete*)packet;
-        if(packet_9->accept)
+        if (packet_9->accept)
         {
             strcpy(room_info[packet_9->room_id].name, packet_9->room_name);
             room_info[packet_9->room_id].member_count = 0;
@@ -127,6 +159,7 @@ int packet_handler(char *packet)
         }
         menu_pointer = LOBBY;
         break;
+    }
     }
     return 0;
 

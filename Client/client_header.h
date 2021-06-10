@@ -17,12 +17,13 @@
 #include <winSock2.h>
 #include <process.h>
 #include <windows.h>
+#include <conio.h>
 
 #define MAX_SIZE 100
 #define ID_SIZE 21
 #define PW_SIZE 21
 #define MAX_ROOM_SIZE 100
-#define BUF_SIZE 200                                // MAKEROOM 패킷 보내면 100 바이트 밖에 못 받아서 임시조치로 200으로 늘려놨습니다.
+#define BUF_SIZE 200                           
 #define PACKET_SIZE 1024
 #define READ	3
 #define	WRITE	5

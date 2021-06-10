@@ -1,6 +1,5 @@
 ﻿#include "client_header.h"
 #include "cln_packet_header.h"
-#include <conio.h>
 
 #define CURSOR_SIZE 1
 
