@@ -78,8 +78,5 @@ void read_from_file()                               // DB 파일 읽어오기
     }
 
 }
-int make_chat_log(FILE *output, room *target)       // 채팅 내용 파일에 저장
-{
 
-}
 

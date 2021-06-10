@@ -1,6 +1,5 @@
 #include "server_header.h"
-#include <process.h>
-#include <windows.h>
+
 
 int accept_thread(int port)
 {

@@ -116,7 +116,7 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
 }
 
 /*  현재 참가 중인 방에서 퇴장
-    member.room_list에서 cur_room이 아닌 방도 퇴장 가능하게 하려면 수정 필요
+    cur_room 에서 나감.
     return value    0 - 정상 종료
 */
 int quit_room(int room_id, int user_id)                        // 방 나가기

@@ -68,7 +68,6 @@ typedef struct _member
     char id[ID_SIZE];  // 4 < strlen(id) < 20
     char pw[PW_SIZE];  // 10 < strlen(pw) < 20
     bool is_online;
-    char room_list[MAX_ROOM_SIZE];
     int cur_room;
     int blocked_user_num;
     int block_list[MAX_SIZE];
