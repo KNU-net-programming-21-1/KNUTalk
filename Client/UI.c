@@ -121,17 +121,17 @@ int lobby(void)
         case UP:
             if (room_select > 1)
             {
-                print_on_xy(55, room_select, "  ");
+                print_on_xy(58, room_select, "  ");
                 room_select = room_select - 1;
-                print_on_xy(55, room_select, "<-");
+                print_on_xy(58, room_select, "<-");
             }
             break;
         case DOWN:
             if (room_select < room_count)
             {
-                print_on_xy(55, room_select, "  ");
+                print_on_xy(58, room_select, "  ");
                 room_select = room_select + 1;
-                print_on_xy(55, room_select, "<-");
+                print_on_xy(58, room_select, "<-");
             }
             break;
         case REFRESH:

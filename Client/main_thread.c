@@ -91,6 +91,7 @@ int user_main_thread(int port)
             {
             case QUIT:
                 closesocket(hSocket);
+                CLEAR;
                 return 0;
 
             case REGISTER:
