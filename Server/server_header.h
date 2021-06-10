@@ -89,7 +89,7 @@ member online_users[MAX_SIZE];      // 접속중인 유저 리스트 -> 서버�
 member registered_users[MAX_SIZE];  // 등록된 모든 유저 리스트 -> 등록한 순서대로 인덱스와 같은 id 부여 || client와 연결 시 online_users 배열에 정보 입력하기 위한 저장공간
 //  DATA RACE BLOCK
 
-FILE* mem_list;                     // 유저 목록이 저장될 파일(서버 종료 시 저장 | 일정 시간 경과 후 주기적으로 백업)
+FILE* mem_list;                     // 유저 목록이 저장될 파일(서버 종료 시 저장)
 
 /*
     OFFSET          10  // errno 개수에 따라 변경......
@@ -113,7 +113,6 @@ static const char *ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
 void init_server();                                      // 서버 실행시 데이터 초기화 및 동기화 (임시로 DB에 뒀습니다)
 void write_to_file();                                    // DB 파일로 출력
 void read_from_file();                                   // DB 파일 읽어오기 | 서버 가동시 최초 실행되어 registered_users 가져옴
-int make_chat_log(FILE *output, room *target);           // 채팅 내용 파일에 저장
 
 /* 방에 관련된 함수 | room_management.c */
 
