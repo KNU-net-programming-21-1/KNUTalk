@@ -217,10 +217,10 @@ int move_cursor(void)
     {
         if(_kbhit())
         {
-            c = getch();
+            c = _getch();
             if(c == 0xE0 || c == 0x00)
             {
-                c = getch();
+                c = _getch();
                 switch (c)
                 {
                     case UP:
