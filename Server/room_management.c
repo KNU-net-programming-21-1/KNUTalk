@@ -159,6 +159,24 @@ int delete_room(int room_id)                                 // 방 삭제 | roo
     return 0;
 }
 
+int room_info_request(int user_id)
+{
+    int i;
+    packet_roominfo packet;
+    packet.type = ROOMINFO;
+    packet.size = sizeof(packet_roominfo);
+
+    for(i = 0; i < MAX_SIZE; i++)
+    {
+        packet.room_member[i] = room_list[i].num_of_mem; 
+    }
+
+    packet_send(user_id, &packet);
+
+    return 0;
+}
+
+
 /*  현재 존재하는 방의 개수 탐색
     return value    ret - 존재하는 방의 개수
 */

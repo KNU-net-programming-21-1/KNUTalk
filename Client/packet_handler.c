@@ -1,16 +1,16 @@
 #include "client_header.h"
 #include "cln_packet_header.h"
 
-void packet_construct(int io_byte, member *recieved)
+void packet_construct(int io_byte)
 {
     int rest_byte = io_byte;
-    char *p = recieved->memberInfo.exOver->buffer;
+    char *p = user.memberInfo.exOver->buffer;
     int packet_size = 0;
     short size, prev_size;
 
-    memcpy(&prev_size, recieved->memberInfo.packet_buf, sizeof(short));
+    memcpy(&prev_size, user.memberInfo.packet_buf, sizeof(short));
 
-    if(recieved->memberInfo.prev_size != 0)
+    if(user.memberInfo.prev_size != 0)
     {
         packet_size = prev_size;
     }
@@ -24,27 +24,26 @@ void packet_construct(int io_byte, member *recieved)
             packet_size = size;
         }
             
-        if(packet_size <= rest_byte + recieved->memberInfo.prev_size)
+        if(packet_size <= rest_byte + user.memberInfo.prev_size)
         {
-            memcpy(recieved->memberInfo.packet_buf + recieved->memberInfo.prev_size, p, packet_size - recieved->memberInfo.prev_size);
+            memcpy(user.memberInfo.packet_buf + user.memberInfo.prev_size, p, packet_size - user.memberInfo.prev_size);
 
-            p += packet_size - recieved->memberInfo.prev_size;
-            rest_byte -= packet_size - recieved->memberInfo.prev_size;
+            p += packet_size - user.memberInfo.prev_size;
+            rest_byte -= packet_size - user.memberInfo.prev_size;
             packet_size = 0;
 
-            packet_handler(recieved->memberInfo.packet_buf);
+            packet_handler(user.memberInfo.packet_buf);
 
-            recieved->memberInfo.prev_size = 0;
+            user.memberInfo.prev_size = 0;
         }
         else
         {
-            memcpy(recieved->memberInfo.packet_buf + recieved->memberInfo.prev_size, p, rest_byte);
-            recieved->memberInfo.prev_size += rest_byte;
+            memcpy(user.memberInfo.packet_buf + user.memberInfo.prev_size, p, rest_byte);
+            user.memberInfo.prev_size += rest_byte;
             rest_byte = 0;
             p += rest_byte;
         }
     }
-    free(recieved);
 }
 
 int packet_handler(char *packet)
@@ -113,7 +112,7 @@ int packet_handler(char *packet)
         packet_roominfo* packet_8 = (packet_roominfo*)packet;
         for(i = 0; i < MAX_SIZE; i++)
         {
-            if(packet_8->room_member != -1)
+            if(packet_8->room_member[i] != -1)
             {
                 printf("ROOM ID : %d || %d/%d\n", i, packet_8->room_member[i], MAX_SIZE);
             }

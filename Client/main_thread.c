@@ -63,6 +63,9 @@ int user_main_thread(int port)
 
     CreateIoCompletionPort((HANDLE)hSocket, hComPort, (DWORD)handleInfo, 0);
 
+    user.memberInfo.s = hSocket;
+    user.memberInfo.exOver = ioInfo;
+
     if(WSARecv(hSocket, &(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL) 
                 == SOCKET_ERROR)
     {
@@ -82,7 +85,6 @@ int user_main_thread(int port)
         for(; menu_pointer == TITLE;)
         {
             init_console();
-            menu_pointer = TITLE;
             menu = title();
 
             switch (menu)
@@ -190,6 +192,10 @@ int user_main_thread(int port)
                     break;
             }        
         }    
+        if(menu_pointer == QUIT)
+        {
+            break;
+        }
 	}
 	return 0;
 }
@@ -211,7 +217,10 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 
 		if(!GQCS || !bytesTrans)
 		{
-			 // 서버와의 연결 끊김
+			// 서버와의 연결 끊김
+            printf("서버와의 연결이 원활하지 않습니다.\n");
+            closesocket(socket);
+            menu_pointer = QUIT;
 			break;
 		}
 
@@ -222,10 +231,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 #endif
 			// 받은 패킷 조립 & 처리
             // 처리에 따른 UI draw
-            member *new = (member*)malloc(sizeof(member));
-            new->memberInfo.exOver = ioInfo;
-            new->memberInfo.prev_size = 0;
-            packet_construct(bytesTrans, new);
+            packet_construct(bytesTrans, ioInfo);
 			WSARecv(socket,	&(ioInfo->wsaBuf), 1, NULL, &flags, &(ioInfo->overlapped), NULL);
 		}
 		else if(ioInfo->rwMode == WRITE)

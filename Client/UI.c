@@ -1,4 +1,4 @@
-#include "client_header.h"
+﻿#include "client_header.h"
 #include "cln_packet_header.h"
 #include <conio.h>
 
@@ -45,12 +45,13 @@ int title(void)
     printf("          　    ●　　　●　　　●　　●　　●●　　　\n");
     printf("          　    ●　　　●　　　●　　●　　●　●　　\n");
     printf("          　    ●　　　　●●●　●　●　　●　　●　\n");
-
+    
+    print_on_xy(21, select, "->");
     print_on_xy(24, 30, "   계정 등록");
     print_on_xy(24, 32, "    로그인");
     print_on_xy(24, 34, "     종료");
 
-    for( ; cursor != SELECT; )
+    for( ; cursor != SELECT && cursor != ESC; )
     {
         cursor = move_cursor();
         switch (cursor)

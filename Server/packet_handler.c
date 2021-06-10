@@ -115,14 +115,18 @@ int packet_handler(int user_id, char *packet_buffer)
         add_block_list(user_id, packet_7->user_name);
         break;
     case ROOMINFO:
+#if DEBUG
+        printf("RoomInfo Request from ID %d\n", user_id);
+#endif
+        room_info_request(user_id);
         break;
 
     case MAKEROOM:
 #if DEBUG
         printf("MakeRoom Request from ID %d\n", user_id);
 #endif
-        packet_makeroom* packet_8 = (packet_makeroom*)packet_buffer;
-        make_room(user_id, packet_8->room_name);
+        packet_makeroom* packet_9 = (packet_makeroom*)packet_buffer;
+        make_room(user_id, packet_9->room_name);
         break;
     
     }

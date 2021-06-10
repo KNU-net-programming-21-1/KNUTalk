@@ -62,11 +62,11 @@ typedef struct _member_info // 패킷 처리를 위한 구조체
 typedef struct _member
 {
     member_info memberInfo;
-    int user_id;
+    char user_id;
     char id[ID_SIZE];  // 4 < strlen(id) < 20
     char pw[PW_SIZE];  // 10 < strlen(pw) < 20
     bool is_online;
-    int room_list[MAX_ROOM_SIZE];
+    char room_list[MAX_ROOM_SIZE];
     int cur_room;
     int blocked_user_num;
     int block_list[MAX_SIZE];
@@ -75,8 +75,8 @@ typedef struct _member
 typedef struct _room
 {
     char room_name[MAX_SIZE];
-    int num_of_mem;
-    int member_list[MAX_SIZE];
+    char num_of_mem;
+    char member_list[MAX_SIZE];
 } room;
 
 /* 서버가 유지할 데이터 */
@@ -119,6 +119,7 @@ int make_room(int id, char *name);                  // 방 생성
 int enter_room(int room_id, int user_id);           // 방 참가
 int quit_room(int room_id, int user_id);            // 방 나가기
 int delete_room(int room_id);                       // 방 삭제
+int room_info_request(int user_id);                 // 방 목록
 int current_room_num(void);                         // 현재 존재하는 방 개수
 int find_empty_room(void);                          // 방 생성이 가능한 room_id
 

@@ -60,7 +60,7 @@ typedef struct SC_packet_login_accept
     short size;
     char type;
     bool accept;
-    int user_id;    // 서버에서 할당한 online_users[] index 클라이언트에게 전달
+    char user_id;    // 서버에서 할당한 online_users[] index 클라이언트에게 전달
 
 }packet_accept; // S -> C 로그인 수락
 
@@ -69,7 +69,7 @@ typedef struct CS_packet_logout_
 {
     short size;
     char type;
-    int id;
+    char id;
 
 }packet_logout;  // C -> S 로그아웃 요청
 
@@ -86,7 +86,7 @@ typedef struct CS_packet_enter
 {
     short size;
     char type;
-    int room_id;
+    char room_id;
     
 }packet_enter;  // C -> S 방 입장 요청
 
@@ -95,7 +95,7 @@ typedef struct SC_packet_enter
     short size;
     char type;
     bool accept;    // 정원 초과일 경우 요청한 클라이언트에게만 실패했다고 전송
-    int room_id;
+    char room_id;
     char user_name[ID_SIZE];
     
 }packet_join;   // S -> C 방 구성원에게 user_name이 입장했다고 알림
@@ -105,7 +105,7 @@ typedef struct CS_packet_leave
 {
     short size;
     char type;
-    int room_id;
+    char room_id;
 
 }packet_quit;   // C -> S 방 퇴장 요청
 
@@ -113,7 +113,7 @@ typedef struct SC_packet_leave
 {
     short size;
     char type;
-    int room_id;
+    char room_id;
     char user_name[ID_SIZE];
 
 }packet_leave;  // S -> C 방 구성원에게 user_name이 퇴장했다고 알림
@@ -123,7 +123,7 @@ typedef struct CS_packet_chat
 {
     short size;
     char type;
-    int room_id;
+    char room_id;
     char buf[BUF_SIZE];
 
 }packet_chat;   // C -> S room_id의 방에 buf 내용 채팅 요청
@@ -168,7 +168,7 @@ typedef struct SC_packet_roominfo
 {
     short size;
     char type;
-    int room_member[MAX_SIZE];  // 방에 있는 사람의 수 || index -> room_member_num
+    char room_member[MAX_SIZE];  // 방에 있는 사람의 수 || index -> room_member_num
     // 방 이름까지 보내기엔 구조체가 너무 커짐 -> 대안...? 자신이 들어가 있는 방의 이름과 id를 클라이언트에 저장
 
 }packet_roominfo;
@@ -179,7 +179,7 @@ typedef struct CS_packet_makeroom
 {
     short size;
     char type;
-    int user_id;
+    char user_id;
     char room_name[MAX_SIZE];
 
 }packet_makeroom;       // C -> S 방 생성 요청
@@ -189,6 +189,6 @@ typedef struct SC_packet_complete	// 위에 구조체랑 재정의 오류 나서
     short size;
     char type;
     bool accept;
-    int room_id;
+    char room_id;
 
 }packet_complete;       // S -> C 방 생성 완료 여부 및 room_id
