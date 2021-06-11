@@ -70,9 +70,9 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
     packet.room_id = room_id;
 
     // critical section
-    
+    WaitForSingleObject(hMutex, INFINITE);
     member_count = room_list[room_id].num_of_mem;
-    
+    ReleaseMutex(hMutex);
     // end of critical section
 
     if (member_count == -1)
@@ -174,6 +174,7 @@ int room_info_request(int user_id)
 
     packet_send(user_id, (char *)&packet);
 
+    WaitForSingleObject(hMutex, INFINITE);
     for(i = 1; i < MAX_SIZE; i++)
     {
         if (room_list[i].num_of_mem != -1)
@@ -184,7 +185,7 @@ int room_info_request(int user_id)
             packet_send(user_id, (char *)&packet);
         }
     }
-
+    ReleaseMutex(hMutex);
     return 0;
 }
 
@@ -219,7 +220,7 @@ int current_room_num(void)                              // 현재 존재하는 �
 int find_empty_room(void)
 {
     int ret;
-
+    WaitForSingleObject(hMutex, INFINITE);
     for(ret = 1; ret < MAX_ROOM_SIZE; ret++)
     {
         if(room_list[ret].num_of_mem == -1)
@@ -227,6 +228,6 @@ int find_empty_room(void)
             return ret;
         }
     }
-    
+    ReleaseMutex(hMutex);
     return MAX_ROOM_SIZE;
 }
