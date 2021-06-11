@@ -195,7 +195,7 @@ char* login(int select)
     printf("\nID를 입력해주세요 || ");
 
     packet->id[0] = _getch();
-    if ( packet->id[0] == 27)
+    if ( packet->id[0] == ESC)
     {
         free(packet);
         return NULL;
