@@ -89,6 +89,7 @@ member online_users[MAX_SIZE];      // 접속중인 유저 리스트 -> 서버�
 member registered_users[MAX_SIZE];  // 등록된 모든 유저 리스트 -> 등록한 순서대로 인덱스와 같은 id 부여 || client와 연결 시 online_users 배열에 정보 입력하기 위한 저장공간
 //  DATA RACE BLOCK
 
+HANDLE hMutex;                      // for critical section
 FILE* mem_list;                     // 유저 목록이 저장될 파일(서버 종료 시 저장)
 
 /*

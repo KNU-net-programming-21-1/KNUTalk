@@ -24,7 +24,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
     else
     {
         // critical section
-
+        WaitForSingleObject(hMutex, INFINITE);
         room_list[id].num_of_mem = 0;
         strcpy(room_list[id].room_name, name);
         for(i = 0; i < MAX_SIZE; i++)
@@ -41,7 +41,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
             printf("Room ID: %d, Room Name: %s\n",i,room_list[i].room_name);
         }
 #endif
-
+        ReleaseMutex(hMutex);
         // end of critical section
 
         packet.accept = true;
@@ -92,7 +92,7 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
     else
     {
         // critical section
-
+        WaitForSingleObject(hMutex, INFINITE);
         room_list[room_id].member_list[member_count] = user_id;
         room_list[room_id].num_of_mem++;        
         online_users[user_id].cur_room = room_id;
@@ -109,7 +109,7 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
             }
             
         }
-
+        ReleaseMutex(hMutex);
         // end of critical section
 
         return 0;
@@ -123,7 +123,7 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
 int quit_room(int room_id, int user_id)                        // 방 나가기
 {
     int i;
-    
+    WaitForSingleObject(hMutex, INFINITE);
     for(i = 0; i < room_list[room_id].num_of_mem; i++)
     {
         if(room_list[room_id].member_list[i] == user_id)
@@ -136,6 +136,7 @@ int quit_room(int room_id, int user_id)                        // 방 나가기
             break;
         }
     }
+    ReleaseMutex(hMutex);
     online_users[user_id].cur_room = 0;
 
     return 0;
@@ -148,14 +149,14 @@ int delete_room(int room_id)                                 // 방 삭제 | roo
     int i;
 
     // critical section
-
+    WaitForSingleObject(hMutex, INFINITE);
     strcpy(room_list[room_id].room_name, NULL);
     for(i = 0; i < room_list[room_id].num_of_mem; i++)
     {
         room_list[room_id].member_list[i] = -1;
     }
     room_list[room_id].num_of_mem = -1;
-    
+    ReleaseMutex(hMutex);
     // end of critical section
 
     return 0;
@@ -196,7 +197,7 @@ int current_room_num(void)                              // 현재 존재하는 �
     int i, ret;
 
     // critical section
-
+    WaitForSingleObject(hMutex, INFINITE);
     for(i = 1, ret = 0; i < MAX_SIZE; i++)
     {
         if(room_list[i].num_of_mem != -1)
@@ -204,7 +205,7 @@ int current_room_num(void)                              // 현재 존재하는 �
             ret++;
         }
     }
-
+    ReleaseMutex(hMutex);
     // end of critical section
 
     return ret;

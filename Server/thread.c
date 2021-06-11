@@ -12,6 +12,7 @@ int accept_thread(int port)
 	SOCKADDR_IN servAdr;
 	int recvBytes, i, flags=0;
 	int empty_slot;						// online_users 배열의 빈 부분 탐색용
+	hMutex = CreateMutex(NULL, FALSE, NULL);			// 뮤텍스 생성
 
     /* WSA startup */
 	if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
