@@ -163,7 +163,7 @@ printf("menu : ");*/
 char* login(int select)
 {
     packet_login* packet = (packet_login*)malloc(sizeof(packet_login));
-    int i;
+    int i, cursor;
     packet->type = LOGIN;
     packet->size = sizeof(packet_login);
 
@@ -190,25 +190,110 @@ char* login(int select)
         break;
     }
     
-    
 
+    cursor = FALSE;
     printf("\nID를 입력해주세요 || ");
 
-    packet->id[0] = _getch();
-    if ( packet->id[0] == ESC)
+    for(i = 0; cursor != SELECT; )
     {
-        free(packet);
-        return NULL;
-    }
-    else
-    {
-        printf("%c", packet->id[0]);
-        packet->id[1] = '\0';
+        cursor = move_cursor();
+        switch (cursor)
+        {
+        case SELECT:
+            if(i == 0)
+            {
+                cursor = FALSE;
+            }
+            else
+            {
+                if(i == BUF_SIZE)
+                {
+                    packet->id[i - 1] = '\0';
+                }
+                else
+                {
+                    packet->id[i] = '\0';
+                }
+            }
+            break;
+
+        case ESC:
+            free(packet);
+            return NULL;
+
+        case DELETE:
+            if (i >= 0)
+            {
+                if (i != 0)
+                {
+                    i--;
+                    printf("\b");
+                    printf(" ");
+                    printf("\b");
+                }
+                packet->id[i] = '\0';
+            }
+            break;
+
+        default:
+            putc(cursor, stdout);
+            packet->id[i] = cursor;
+            i++;
+            break;
+        }
     }
 
-    scanf("%s", &packet->id[1]);
+    cursor = FALSE;
     printf("\n비밀번호를 입력해주세요 || ");
-    scanf("%s", packet->pw);
+
+    for(i = 0; cursor != SELECT; )
+    {
+        cursor = move_cursor();
+        switch (cursor)
+        {
+        case SELECT:
+            if(i == 0)
+            {
+                cursor = FALSE;
+            }
+            else
+            {
+                if(i == BUF_SIZE)
+                {
+                    packet->pw[i - 1] = '\0';
+                }
+                else
+                {
+                    packet->pw[i] = '\0';
+                }
+            }
+            break;
+
+        case ESC:
+            free(packet);
+            return NULL;
+
+        case DELETE:
+            if (i >= 0)
+            {
+                if (i != 0)
+                {
+                    i--;
+                    printf("\b");
+                    printf(" ");
+                    printf("\b");
+                }
+                packet->pw[i] = '\0';
+            }
+            break;
+
+        default:
+            putc('*', stdout);
+            packet->pw[i] = cursor;
+            i++;
+            break;
+        }
+    }
     printf("\n서버와 통신 중 입니다...\n");
     
     return (char*)packet;
@@ -216,6 +301,8 @@ char* login(int select)
 
 char* reg_session(int select)
 {
+    int i, cursor;
+    char buf[PW_SIZE];
     packet_register* packet;
     packet = (packet_register*)malloc(sizeof(packet_register));
     packet->type = REGISTER;
@@ -246,24 +333,167 @@ char* reg_session(int select)
         printf("ID는 4~20자리, 비밀번호는 10~20자리 범위 내에서 입력해주세요.\n");
         break;
     }
-    
+
+    cursor = FALSE;
     printf("\n사용할 ID를 입력해주세요 || ");
 
-    packet->id[0] = _getch();
-    if ( packet->id[0] == ESC)
+    for(i = 0; cursor != SELECT; )
     {
-        free(packet);
+        cursor = move_cursor();
+        switch (cursor)
+        {
+        case SELECT:
+            if(i == 0)
+            {
+                cursor = FALSE;
+            }
+            else
+            {
+                if(i == BUF_SIZE)
+                {
+                    packet->id[i - 1] = '\0';
+                }
+                else
+                {
+                    packet->id[i] = '\0';
+                }
+            }
+            break;
+
+        case ESC:
+            free(packet);
+            return NULL;
+
+        case DELETE:
+            if (i >= 0)
+            {
+                if (i != 0)
+                {
+                    i--;
+                    printf("\b");
+                    printf(" ");
+                    printf("\b");
+                }
+                packet->id[i] = '\0';
+            }
+            break;
+
+        default:
+            putc(cursor, stdout);
+            packet->id[i] = cursor;
+            i++;
+            break;
+        }
+    }
+    cursor = FALSE;
+    printf("\n사용할 비밀번호를 입력해주세요 || ");
+
+    for(i = 0; cursor != SELECT; )
+    {
+        cursor = move_cursor();
+        switch (cursor)
+        {
+        case SELECT:
+            if(i == 0)
+            {
+                cursor = FALSE;
+            }
+            else
+            {
+                if(i == BUF_SIZE)
+                {
+                    buf[i - 1] = '\0';
+                }
+                else
+                {
+                    buf[i] = '\0';
+                }
+            }
+            break;
+
+        case ESC:
+            free(packet);
+            return NULL;
+
+        case DELETE:
+            if (i >= 0)
+            {
+                if (i != 0)
+                {
+                    i--;
+                    printf("\b");
+                    printf(" ");
+                    printf("\b");
+                }
+                buf[i] = '\0';
+            }
+            break;
+
+        default:
+            putc('*', stdout);
+            buf[i] = cursor;
+            i++;
+            break;
+        }
+    }
+    cursor = FALSE;
+    printf("\n비밀번호를 다시 한번 입력해주세요 || ");
+    for(i = 0; cursor != SELECT; )
+    {
+        cursor = move_cursor();
+        switch (cursor)
+        {
+        case SELECT:
+            if(i == 0)
+            {
+                cursor = FALSE;
+            }
+            else
+            {
+                if(i == BUF_SIZE)
+                {
+                    packet->pw[i - 1] = '\0';
+                }
+                else
+                {
+                    packet->pw[i] = '\0';
+                }
+            }
+            break;
+
+        case ESC:
+            free(packet);
+            return NULL;
+
+        case DELETE:
+            if (i >= 0)
+            {
+                if (i != 0)
+                {
+                    i--;
+                    printf("\b");
+                    printf(" ");
+                    printf("\b");
+                }
+                packet->pw[i] = '\0';
+            }
+            break;
+
+        default:
+            putc('*', stdout);
+            packet->pw[i] = cursor;
+            i++;
+            break;
+        }
+    }
+    if(strcmp(packet->pw, buf))
+    {
+        printf("\n\n입력된 비밀번호가 다릅니다.\n");
+        printf("\nenter키를 입력해 타이틀로 돌아가기");
+        while(move_cursor() != SELECT);
         return NULL;
     }
-    else
-    {
-        printf("%c", packet->id[0]);
-        packet->id[1] = '\0';
-    }
-
-    scanf("%s", &packet->id[1]);
-    printf("\n사용할 비밀번호를 입력해주세요 || ");
-    scanf("%s", packet->pw);
+        
     printf("\n서버와 통신 중 입니다...\n");
     
     return (char*)packet;
