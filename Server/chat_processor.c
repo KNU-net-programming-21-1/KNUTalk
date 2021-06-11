@@ -23,7 +23,7 @@ int add_block_list(int user_id, char *user_name)
         packet.accept = false;
     }
     
-    packet_send(user_id, &packet);
+    packet_send(user_id, (char *)&packet);
     
     return 0;
 }
@@ -50,7 +50,7 @@ int echo_message(int user_id, int room_number, char *message)
                 {
                     if (online_users[target_id].is_online)
                     {
-                        packet_send(target_id, &packet);
+                        packet_send(target_id, (char *)&packet);
                     }
                 }
             }
@@ -59,7 +59,7 @@ int echo_message(int user_id, int room_number, char *message)
         {
             if (online_users[target_id].is_online)
             {
-                packet_send(target_id, &packet);
+                packet_send(target_id, (char *)&packet);
             }
         }
         

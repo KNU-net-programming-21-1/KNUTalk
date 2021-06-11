@@ -75,7 +75,7 @@ int packet_handler(int user_id, char *packet_buffer)
         packet_3.accept = true;
         packet_3.size = sizeof(packet_logout_accept);
         packet_3.type = LOGOUT;
-        packet_send(user_id, &packet_3);
+        packet_send(user_id, (char *)&packet_3);
         shutdown(online_users[user_id].memberInfo.s, SD_SEND);
         break;
     

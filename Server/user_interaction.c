@@ -31,7 +31,7 @@ int login(int user_id, char *ID, char *PW)                  // 서버에 로그�
         packet.accept = false;
     }
     
-    packet_send(user_id, &packet);
+    packet_send(user_id, (char *)&packet);
 
     return 0;
 }
@@ -86,14 +86,14 @@ int member_register(int user_id, char *ID, char *PW)         // 서버에 계정
         registered_users[ret_num].is_online = false;     // 등록 성공할 경우 초기화면으로 돌아가 로그인 필요 (클라이언트에서 루프로 처리, 성공 -> 루프 탈출)
 
         packet.accept = true;
-        packet_send(user_id, &packet);
+        packet_send(user_id, (char *)&packet);
 
 		return ret_num;
     }
     else
     {
         packet.accept = DATA_FAILURE;
-        packet_send(user_id, &packet);
+        packet_send(user_id, (char *)&packet);
         return error_handling(DATA_FAILURE + OFFSET);
     }
 }

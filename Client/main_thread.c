@@ -113,7 +113,7 @@ int user_main_thread(int port)
                     if(CS_register != NULL)
                     {
                         menu_pointer = REGISTER;
-                        packet_send(hSocket, CS_register);
+                        packet_send(hSocket, (char *)CS_register);
                         while(menu_pointer == REGISTER);
                         free(CS_register);
                     }
@@ -137,7 +137,7 @@ int user_main_thread(int port)
                     if(CS_login != NULL)
                     {
                         menu_pointer = LOGIN;
-                        packet_send(hSocket, CS_login);
+                        packet_send(hSocket, (char *)CS_login);
                         while(menu_pointer == LOGIN);
                         free(CS_login);
                     }
@@ -154,7 +154,7 @@ int user_main_thread(int port)
         packet_request request;
         request.size = sizeof(packet_request);
         request.type = ROOMINFO;
-        packet_send(hSocket, &request);
+        packet_send(hSocket, (char *)&request);
         menu_pointer = LOBBY;
 
         for(; menu_pointer == LOBBY; )
@@ -174,7 +174,7 @@ int user_main_thread(int port)
                     CS_logout->id = user.user_id;
                     CS_logout->size = sizeof(packet_logout);
                     CS_logout->type = LOGOUT;
-                    packet_send(hSocket, CS_logout);
+                    packet_send(hSocket, (char *)CS_logout);
                     while (menu_pointer == LOGOUT);
                     break;
 
@@ -189,11 +189,11 @@ int user_main_thread(int port)
                     
                     printf("생성할 방의 이름을 입력해주세요\n->");
                     scanf("%s", CS_makeroom->room_name);
-                    packet_send(hSocket, CS_makeroom);
+                    packet_send(hSocket, (char *)CS_makeroom);
                     while(menu_pointer == MAKEROOM);
                     break;
                 case REFRESH + MAX_SIZE:
-                    packet_send(hSocket, &request);
+                    packet_send(hSocket, (char *)&request);
                     break;
                 default:
                     menu_pointer = ENTER;
@@ -202,7 +202,7 @@ int user_main_thread(int port)
                     CS_enter->room_id = menu;
                     CS_enter->size = sizeof(packet_enter);
                     CS_enter->type = ENTER;
-                    packet_send(hSocket, CS_enter);
+                    packet_send(hSocket, (char *)CS_enter);
                     while(menu_pointer == ENTER);
                     CLEAR;
                     set_console_size(100, COL);
@@ -233,7 +233,7 @@ int user_main_thread(int port)
 
                 else if(chat_buf != NULL)
                 {
-                    packet_send(hSocket, chat_buf);
+                    packet_send(hSocket, (char *)chat_buf);
                     while(menu_pointer == CHAT);
                     free(chat_buf);
                 }
@@ -245,7 +245,7 @@ int user_main_thread(int port)
                     CS_quit->room_id = user.cur_room;
                     CS_quit->size = sizeof(packet_quit);
                     CS_quit->type = LEAVE;
-                    packet_send(hSocket, CS_quit);
+                    packet_send(hSocket, (char *)CS_quit);
                     free(CS_quit);
                 }
 
@@ -275,7 +275,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 
 	while(true)
 	{
-		GQCS = GetQueuedCompletionStatus(hComPort, &bytesTrans, (LPDWORD)&handleInfo, (LPOVERLAPPED)&ioInfo, INFINITE);
+		GQCS = GetQueuedCompletionStatus(hComPort, &bytesTrans, (LPDWORD)&handleInfo, (LPOVERLAPPED *)&ioInfo, INFINITE);
         socket = handleInfo->hServSock;
 
 		if(!GQCS || !bytesTrans)

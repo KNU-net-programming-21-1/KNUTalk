@@ -18,7 +18,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
     if(id == MAX_ROOM_SIZE)
     {
         packet.accept = false;
-        packet_send(user_id, &packet);
+        packet_send(user_id, (char *)&packet);
         return error_handling(LIMIT_REACHED + OFFSET);
     }
     else
@@ -47,7 +47,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
         packet.accept = true;
         packet.room_id = id;
         strcpy(packet.room_name, name);
-        packet_send(user_id, &packet);
+        packet_send(user_id, (char *)&packet);
 
         return id;
     }   
@@ -78,14 +78,14 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
     if (member_count == -1)
     {
         packet.accept = false;
-        packet_send(user_id, &packet);
+        packet_send(user_id, (char *)&packet);
 
         return error_handling(SEARCH_ERROR + OFFSET);
     }
     else if(member_count == MAX_SIZE)
     {
         packet.accept = false;
-        packet_send(user_id, &packet);
+        packet_send(user_id, (char *)&packet);
 
         return error_handling(LIMIT_REACHED + OFFSET);
     }
@@ -105,7 +105,7 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
             member_id = room_list[room_id].member_list[i];
             if(online_users[member_id].cur_room == room_id) // 현재 방이 room_id인 유저에게만 패킷 전송
             {
-                packet_send(member_id, &packet);
+                packet_send(member_id, (char *)&packet);
             }
             
         }
@@ -171,7 +171,7 @@ int room_info_request(int user_id)
     packet.member_count = 0;
     strcpy(packet.room_name, room_list[0].room_name);
 
-    packet_send(user_id, &packet);
+    packet_send(user_id, (char *)&packet);
 
     for(i = 1; i < MAX_SIZE; i++)
     {
@@ -180,7 +180,7 @@ int room_info_request(int user_id)
             packet.room_id = i;
             packet.member_count = room_list[i].num_of_mem;
             strcpy(packet.room_name, room_list[i].room_name);
-            packet_send(user_id, &packet);
+            packet_send(user_id, (char *)&packet);
         }
     }
 
