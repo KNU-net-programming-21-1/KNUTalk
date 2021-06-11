@@ -117,7 +117,7 @@ DWORD WINAPI WorkerThread(LPVOID CompletionPortIO)      // worker thread
 
 	while(true)
 	{
-		GQCS = GetQueuedCompletionStatus(hComPort, &bytesTrans, (LPDWORD)&handleInfo, (LPOVERLAPPED)&ioInfo, INFINITE);
+		GQCS = GetQueuedCompletionStatus(hComPort, &bytesTrans, (LPDWORD)&handleInfo, (LPOVERLAPPED *)&ioInfo, INFINITE);
 		socket = handleInfo->hClntSock;
 
 		if(!GQCS || !bytesTrans)

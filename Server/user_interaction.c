@@ -73,7 +73,7 @@ int member_register(int user_id, char *ID, char *PW)         // 서버에 계정
     if(search_user(ID) != -1)
     {
         packet.accept = DATA_DUPLICATE;
-        packet_send(user_id, &packet);
+        packet_send(user_id, (char *)&packet);
         return error_handling(DATA_DUPLICATE + OFFSET);
     }
 	else if(id_len > 4 && id_len < 20 && pw_len > 10 && pw_len < 20)

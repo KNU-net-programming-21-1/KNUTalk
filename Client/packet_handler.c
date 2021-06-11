@@ -125,17 +125,17 @@ int packet_handler(char *packet)
             print_on_xy(1, chat_pointer * 2, packet_6->user_name);
             print_on_xy(0, chat_pointer * 2 + 1, ">");
             print_on_xy(1, chat_pointer * 2 + 1, packet_6->buf);
-            chat_pointer++;
         }
         else
         {
             for(i = 1; i < LINE_SIZE ; i++)
             {
                 print_on_xy(1, i * 2, "                                                                                           ");
-                print_on_xy(1, i * 2 + 1, ">                                                                                           ");
-                print_on_xy(1, i * 2, chat_buffer[(chat_pointer + i) % LINE_SIZE]);
+                print_on_xy(0, i * 2 + 1, ">                                                                                           ");
+                print_on_xy(1, i * 2, chat_buffer[(chat_pointer + i + 1) % LINE_SIZE]);
             }
         }
+        chat_pointer++;
         menu_pointer = ROOM;
         break;
 
