@@ -214,7 +214,24 @@ int user_main_thread(int port)
                 chat_buf = (packet_chat*)chat_window();
                 menu_pointer = CHAT;
 
-                if(chat_buf != NULL)
+				if (!strcmp(chat_buf->buf, "/B"))
+				{
+					CLEAR;
+					set_console_size(50, ROW / 2);
+					menu_pointer = BLOCK;
+					packet_block *CS_block = (packet_block*)malloc(sizeof(packet_block));
+					CS_block->size = sizeof(packet_block);
+					CS_block->type = BLOCK;
+
+					printf("차단할 사용자의 이름을 입력해주세요\n->");
+					scanf("%s", CS_block->user_name);
+					packet_send(hSocket, (char *)CS_block);
+					while (menu_pointer == BLOCK);
+					free(CS_block);
+					//free(chat_buf);
+				}
+
+                else if(chat_buf != NULL)
                 {
                     packet_send(hSocket, chat_buf);
                     while(menu_pointer == CHAT);

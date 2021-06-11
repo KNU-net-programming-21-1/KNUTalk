@@ -138,17 +138,22 @@ int packet_handler(char *packet)
         break;
 
     case BLOCK:
-        packet_blocked* packet_7 = (packet_blocked*)packet;
-        if (packet_7->accept)
-        {
-
-        }
-        else
-        {
-
-        }
-        //menu_pointer = 
-        break;
+		CLEAR;
+		packet_blocked* packet_7 = (packet_blocked*)packet;
+		if (packet_7->accept)
+		{
+			printf("차단하였습니다.\n");
+		}
+		else
+		{
+			printf("존재하지 않는 사용자입니다.\n");
+		}
+		printf("\nenter키를 입력하여 채팅방으로 돌아가기\n");
+		while (move_cursor() != SELECT);
+		set_console_size(100, COL);
+		chat_pointer = 0;
+		menu_pointer = ROOM;
+		break;
 
     case ROOMINFO:
         packet_roominfo* packet_8 = (packet_roominfo*)packet;

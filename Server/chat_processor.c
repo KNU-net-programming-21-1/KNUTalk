@@ -15,6 +15,7 @@ int add_block_list(int user_id, char *user_name)
     {
         num = online_users[user_id].blocked_user_num;
         online_users[user_id].block_list[num] = id;
+		online_users[user_id].blocked_user_num++;
         packet.accept = true;
     }
     else
