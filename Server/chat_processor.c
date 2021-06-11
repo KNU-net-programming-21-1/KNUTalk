@@ -47,6 +47,7 @@ int echo_message(int user_id, int room_number, char *message)
     packet.type = CHAT;
     packet.size = sizeof(packet_echo);
 
+    WaitForSingleObject(hMutex, INFINITE);
     for (i = 0; i < room_list[room_number].num_of_mem; i++)
     {
         target_id = room_list[room_number].member_list[i];
@@ -72,6 +73,6 @@ int echo_message(int user_id, int room_number, char *message)
         }
         
     }
-
+    ReleaseMutex(hMutex);
     return 0;
 }
