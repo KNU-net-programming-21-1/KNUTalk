@@ -1,4 +1,4 @@
-#include "server_header.h"
+﻿#include "server_header.h"
 #include "packet_header.h"
 
 /*  int user_id(방 생성 요청한 유저)와 char* name을 입력으로 받아 room_list에 등록
@@ -48,7 +48,7 @@ int make_room(int user_id, char *name)                       // 방 생성 | roo
         packet.room_id = id;
         strcpy(packet.room_name, name);
         packet_send(user_id, (char *)&packet);
-
+        write_room_list_to_file();
         return id;
     }   
 }
@@ -63,6 +63,7 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
     int member_count;
     int i;
     int member_id;
+    char buf[BUF_SIZE];
     packet_join packet;
 
     packet.size = sizeof(packet_join);
@@ -100,12 +101,15 @@ int enter_room(int room_id, int user_id)              // 방 참가 (need mutex)
         packet.accept = true;
         packet.room_id = room_id;
 
+        packet_send(user_id, (char *)&packet);
+        strcpy(buf, online_users[user_id].id);
+        strcat(buf, "님이 입장하였습니다.");
         for(i = 0; i < room_list[room_id].num_of_mem; i++)
         {
             member_id = room_list[room_id].member_list[i];
-            if(online_users[member_id].cur_room == room_id) // 현재 방이 room_id인 유저에게만 패킷 전송
+            if(online_users[member_id].cur_room == room_id && member_id != user_id) // 현재 방이 room_id인 유저에게만 패킷 전송
             {
-                packet_send(member_id, (char *)&packet);
+                echo_message(user_id, room_id, buf);
             }
             
         }

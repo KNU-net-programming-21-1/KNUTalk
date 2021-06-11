@@ -95,7 +95,7 @@ int packet_handler(int user_id, char *packet_buffer)
         char buf[MAX_SIZE];
         quit_room(packet_5->room_id, user_id);
         strcpy(buf, online_users[user_id].id);
-        strcat(buf, "가 퇴장하였습니다.");
+        strcat(buf, "님이 퇴장하였습니다.");
         echo_message(user_id, packet_5->room_id, buf);
         break;
 

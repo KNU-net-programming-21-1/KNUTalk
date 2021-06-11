@@ -133,7 +133,7 @@ int lobby(void)
                 print_on_xy(58, room_select, "<-");
             }
             break;
-        case REFRESH:
+        case REFRESH + MAX_SIZE:
             return REFRESH + MAX_SIZE;
         case SELECT:
             if(room_count != 0)
@@ -250,7 +250,7 @@ char* reg_session(int select)
     printf("\n사용할 ID를 입력해주세요 || ");
 
     packet->id[0] = _getch();
-    if ( packet->id[0] == 27)
+    if ( packet->id[0] == ESC)
     {
         free(packet);
         return NULL;
@@ -274,10 +274,16 @@ char* chat_window(void)
     int cursor = FALSE;
     int i;
     char buf[BUF_SIZE];
-    packet_chat* packet;
+    packet_chat* packet = (packet_chat*)malloc(sizeof(packet_chat));
+    packet->room_id = user.cur_room;
+    packet->size = sizeof(packet_chat);
+    packet->type = CHAT;
 
     set_cursor_view(TRUE);
-    print_on_xy(1, 56, "->");
+    print_on_xy(50, 0, room_info[user.cur_room].name);
+    print_on_xy(5, 62, "사용자 블락하기(F3)");
+    print_on_xy(75, 62, "로비로 돌아가기(ESC)");
+    print_on_xy(1, 56, "->                                                                                           ");
     move_to_xy(4, 56);
     for(i = 0; i < BUF_SIZE; )
     {
@@ -291,10 +297,6 @@ char* chat_window(void)
             }
             else
             {
-                packet = (packet_chat*)malloc(sizeof(packet_chat));
-                packet->room_id = user.cur_room;
-                packet->size = sizeof(packet_chat);
-                packet->type = CHAT;
                 if(i == BUF_SIZE)
                 {
                     buf[i - 1] = '\0';
@@ -304,11 +306,15 @@ char* chat_window(void)
                     buf[i] = '\0';
                 }
                 strcpy(packet->buf, buf);
-                print_on_xy(1, 56, "->                                                                                           ");
+                
                 move_to_xy(4, 56);
                 return (char*)packet;
             }
             break;
+
+        case B_USER + MAX_SIZE:
+            menu_pointer = BLOCK;
+            return NULL;
 
         case ESC:
             return NULL;
@@ -333,6 +339,7 @@ char* chat_window(void)
             break;
         }
     }
+    return (char*)packet;
 }
 
 int move_cursor(void)
@@ -357,7 +364,9 @@ int move_cursor(void)
                     case RIGHT:
                         return RIGHT;
                     case REFRESH:
-                        return REFRESH;
+                        return REFRESH + MAX_SIZE;
+                    case B_USER:
+                        return B_USER + MAX_SIZE;
                     default:
                         return c;
                 }

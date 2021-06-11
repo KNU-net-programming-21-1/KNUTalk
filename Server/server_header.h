@@ -112,8 +112,9 @@ static const char *ERROR_CODE[] = {      // ERROR_CODE = errno + OFFSET
 
 /* 데이터 베이스 관리 함수 | DB_management.c */
 void init_server();                                      // 서버 실행시 데이터 초기화 및 동기화 (임시로 DB에 뒀습니다)
-void write_to_file();                                    // DB 파일로 출력
-void read_from_file();                                   // DB 파일 읽어오기 | 서버 가동시 최초 실행되어 registered_users 가져옴
+void write_member_list_to_file();                                  // DB 파일로 출력
+void write_room_list_to_file();                                    // DB 파일로 출력
+void read_from_file();                                   // DB 파일 읽어오기 | 서버 가동시 최초 실행되어 registered_users / room_list 가져옴
 
 /* 방에 관련된 함수 | room_management.c */
 

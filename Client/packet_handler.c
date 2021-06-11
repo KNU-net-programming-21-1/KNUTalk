@@ -116,7 +116,7 @@ int packet_handler(char *packet)
     case CHAT:
         int i;
         packet_echo* packet_6 = (packet_chat*)packet;
-        memset(chat_buffer[chat_pointer & LINE_SIZE], 0x00, sizeof(char) * LINE_SIZE);
+        memset(chat_buffer[chat_pointer % LINE_SIZE], 0x00, sizeof(char) * LINE_SIZE);
         strcpy(chat_buffer[chat_pointer % LINE_SIZE], packet_6->user_name);
         strcat(chat_buffer[chat_pointer % LINE_SIZE], "\n>");
         strcat(chat_buffer[chat_pointer % LINE_SIZE], packet_6->buf);
@@ -125,25 +125,34 @@ int packet_handler(char *packet)
             print_on_xy(1, chat_pointer * 2, packet_6->user_name);
             print_on_xy(0, chat_pointer * 2 + 1, ">");
             print_on_xy(1, chat_pointer * 2 + 1, packet_6->buf);
+            chat_pointer++;
         }
         else
         {
-            for(i = 0; i < LINE_SIZE ; i++)
+            for(i = 1; i < LINE_SIZE ; i++)
             {
+                print_on_xy(1, i * 2, "                                                                                           ");
+                print_on_xy(1, i * 2 + 1, ">                                                                                           ");
                 print_on_xy(1, i * 2, chat_buffer[(chat_pointer + i) % LINE_SIZE]);
             }
         }
-        chat_pointer++;
         menu_pointer = ROOM;
         break;
 
     case BLOCK:
 		CLEAR;
 		packet_blocked* packet_7 = (packet_blocked*)packet;
-		if (packet_7->accept)
+		if (packet_7->accept == true)
 		{
+            user.block_list[user.blocked_user_num - 1];
+            user.blocked_user_num++;
+
 			printf("차단하였습니다.\n");
 		}
+        else if(packet_7->accept == DATA_DUPLICATE)
+        {
+            printf("자기자신은 차단할 수 없습니다.\n");
+        }
 		else
 		{
 			printf("존재하지 않는 사용자입니다.\n");
@@ -151,7 +160,7 @@ int packet_handler(char *packet)
 		printf("\nenter키를 입력하여 채팅방으로 돌아가기\n");
 		while (move_cursor() != SELECT);
 		set_console_size(100, COL);
-		chat_pointer = 0;
+		chat_pointer = 1;
 		menu_pointer = ROOM;
 		break;
 

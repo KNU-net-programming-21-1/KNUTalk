@@ -3,20 +3,28 @@
 
 int add_block_list(int user_id, char *user_name)
 {
-    int num, id;
+    int num;
+    int id = search_user(user_name);
     packet_blocked packet;
-
+    
     packet.type = BLOCK;
     packet.size = sizeof(packet_blocked);
-    
-    id = search_user(user_name);
-    
+    packet.user_id = id;
+
     if(id != -1)
     {
-        num = online_users[user_id].blocked_user_num;
-        online_users[user_id].block_list[num] = id;
-		online_users[user_id].blocked_user_num++;
-        packet.accept = true;
+        if(id == online_users[user_id].user_id)
+        {
+            packet.accept = DATA_DUPLICATE;
+        }
+        else
+        {
+            num = online_users[user_id].blocked_user_num;
+            online_users[user_id].block_list[num] = id;
+            online_users[user_id].blocked_user_num++;
+            
+            packet.accept = true;
+        }
     }
     else
     {
@@ -46,7 +54,7 @@ int echo_message(int user_id, int room_number, char *message)
         {
             for (j = 0; j < online_users[target_id].blocked_user_num; j++)
             {
-                if (user_id != online_users[target_id].block_list[j])
+                if (online_users[user_id].user_id != online_users[target_id].block_list[j])
                 {
                     if (online_users[target_id].is_online)
                     {

@@ -24,8 +24,15 @@ typedef struct _file_data{
     char pw[PW_SIZE];
 } fdata;
 
+typedef struct _room_data{
+    int room_id;
+    char name[MAX_SIZE];
+} rdata;
 
-const char* input_file = "usr.txt";
+
+
+const char* user_file = "usr.txt";
+const char* room_file = "room.txt";
 
 void init_server(){
     int i;
@@ -41,24 +48,48 @@ void init_server(){
     read_from_file();
 }
 
-void write_to_file()                                    // DB 파일로 출력
+void write_member_list_to_file()                                    // DB 파일로 출력
 {
     int i;
     int new_users = registered_user();
 
-    fseek(mem_list, 0, SEEK_SET);                       // 파일 처음으로 이동해서 새로운 내용으로 덮어쓰기
+    if(!(mem_list = fopen(user_file,"w+")))        // 파일 오픈 | 오류처리
+    {
+        fprintf(stderr,"FILE OPEN ERROR.\n");
+        exit(1);
+    }
 
     for (i = 0; i < new_users; i++)
     {
         fprintf(mem_list, "%d %s %s\n", registered_users[i].user_id, registered_users[i].id, registered_users[i].pw);
     }
-
+    fclose(mem_list);
 }
+
+void write_room_list_to_file()                                    // DB 파일로 출력
+{
+    int i;
+    int new_rooms = current_room_num();
+
+    if(!(mem_list = fopen(room_file,"w+")))        // 파일 오픈 | 오류처리
+    {
+        fprintf(stderr,"FILE OPEN ERROR.\n");
+        exit(1);
+    }
+
+    for (i = 1; i <= new_rooms; i++)
+    {
+        fprintf(mem_list, "%d %s\n", i, room_list[i].room_name);
+    }
+    fclose(mem_list);
+}
+
 void read_from_file()                               // DB 파일 읽어오기
 {
     fdata tmp;
+    rdata tmp_r;
 
-    if(!(mem_list = fopen(input_file,"r+")))        // 파일 오픈 | 오류처리
+    if(!(mem_list = fopen(user_file,"r+")))        // 파일 오픈 | 오류처리
     {
         fprintf(stderr,"FILE OPEN ERROR.\n");
         exit(1);
@@ -78,7 +109,27 @@ void read_from_file()                               // DB 파일 읽어오기
         printf("USER ID : %d, ID: %s ,PW: %s\n", tmp.user_id, tmp.id, tmp.pw);
 #endif
     }
+    fclose(mem_list);
+    
+#if DEBUG
+    puts("Current Registered Room List");
+#endif
+    
+    if(!(mem_list = fopen(room_file,"r+")))        // 파일 오픈 | 오류처리
+    {
+        fprintf(stderr,"FILE OPEN ERROR.\n");
+        exit(1);
+    }
+    
+    while(fscanf(mem_list,"%d %s",&tmp_r.room_id, tmp_r.name) != EOF)
+    {
+        room_list[tmp_r.room_id].num_of_mem = 0;
+        strcpy(room_list[tmp_r.room_id].room_name,tmp_r.name);
 
+#if DEBUG
+        printf("ROOM ID : %d, NAME: %s\n", tmp_r.room_id, tmp_r.name);
+#endif
+    }
 }
 
 

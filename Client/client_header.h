@@ -40,11 +40,12 @@
 #define DELETE  8
 #define SELECT  13
 #define ESC     27
+#define B_USER  61
+#define REFRESH 63
 #define UP      72
-#define DOWN    80
 #define LEFT    75
 #define RIGHT   77
-#define REFRESH 63
+#define DOWN    80
 
 #define CLEAR system("cls")
 
@@ -85,7 +86,6 @@ typedef struct _member
     int user_id;
     char id[ID_SIZE];  // 4 < strlen(id) < 20
     char pw[PW_SIZE];  // 10 < strlen(pw) < 20
-    int room_list[MAX_ROOM_SIZE];
     int cur_room;
     int blocked_user_num;
     int block_list[MAX_SIZE];

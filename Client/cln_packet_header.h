@@ -151,7 +151,8 @@ typedef struct SC_packet_blocked
 {
     short size;
     char type;
-    bool accept;    // 존재하는 아이디가 아닐 경우 false
+    char user_id;
+    char accept;    // 존재하는 아이디가 아닐 경우 false
 
 }packet_blocked;    // S -> C 사용자 블락 완료 여부
 

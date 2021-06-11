@@ -88,6 +88,8 @@ int member_register(int user_id, char *ID, char *PW)         // 서버에 계정
         packet.accept = true;
         packet_send(user_id, (char *)&packet);
 
+        write_member_list_to_file();
+
 		return ret_num;
     }
     else

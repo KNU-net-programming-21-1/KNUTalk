@@ -16,6 +16,7 @@ int user_main_thread(int port)
 	int recvBytes, i, flags = 0;
 
     init_console();
+    chat_pointer = 1;
 
     //mutex_lock = CreateMutex(NULL, FALSE, NULL);
 
@@ -154,7 +155,6 @@ int user_main_thread(int port)
         packet_request request;
         request.size = sizeof(packet_request);
         request.type = ROOMINFO;
-        packet_send(hSocket, (char *)&request);
         menu_pointer = LOBBY;
 
         for(; menu_pointer == LOBBY; )
@@ -162,6 +162,7 @@ int user_main_thread(int port)
             CLEAR;
             init_console();
             move_to_xy(0, 0);
+            packet_send(hSocket, (char *)&request);
 
             menu = lobby();
 
@@ -193,7 +194,6 @@ int user_main_thread(int port)
                     while(menu_pointer == MAKEROOM);
                     break;
                 case REFRESH + MAX_SIZE:
-                    packet_send(hSocket, (char *)&request);
                     break;
                 default:
                     menu_pointer = ENTER;
@@ -211,41 +211,42 @@ int user_main_thread(int port)
             for (; menu_pointer == ROOM; )
             {
                 packet_chat* chat_buf;
-                chat_buf = (packet_chat*)chat_window();
                 menu_pointer = CHAT;
+                chat_buf = (packet_chat*)chat_window();
 
-				if (!strcmp(chat_buf->buf, "/B"))
-				{
-					CLEAR;
-					set_console_size(50, ROW / 2);
-					menu_pointer = BLOCK;
-					packet_block *CS_block = (packet_block*)malloc(sizeof(packet_block));
-					CS_block->size = sizeof(packet_block);
-					CS_block->type = BLOCK;
-
-					printf("차단할 사용자의 이름을 입력해주세요\n->");
-					scanf("%s", CS_block->user_name);
-					packet_send(hSocket, (char *)CS_block);
-					while (menu_pointer == BLOCK);
-					free(CS_block);
-					//free(chat_buf);
-				}
-
-                else if(chat_buf != NULL)
+                if(chat_buf != NULL)
                 {
                     packet_send(hSocket, (char *)chat_buf);
                     while(menu_pointer == CHAT);
                     free(chat_buf);
                 }
                 else
-                {
+                {   
+                    if(menu_pointer == BLOCK)
+                    {
+                        CLEAR;
+                        set_console_size(50, ROW / 2);
+                        packet_block *CS_block = (packet_block*)malloc(sizeof(packet_block));
+                        CS_block->size = sizeof(packet_block);
+                        CS_block->type = BLOCK;
+
+                        printf("차단할 사용자의 이름을 입력해주세요\n->");
+                        scanf("%s", CS_block->user_name);
+                        packet_send(hSocket, (char *)CS_block);
+                        while (menu_pointer == BLOCK);
+                        free(CS_block);
+                        continue;
+                        //free(chat_buf);
+                    }
                     menu_pointer = LOBBY;
-                    chat_pointer = 0;
+                    chat_pointer = 1;
                     packet_quit* CS_quit = (packet_quit*)malloc(sizeof(packet_quit));
                     CS_quit->room_id = user.cur_room;
                     CS_quit->size = sizeof(packet_quit);
                     CS_quit->type = LEAVE;
                     packet_send(hSocket, (char *)CS_quit);
+                    room_info[user.cur_room].member_count--;
+                    user.cur_room = 0;
                     free(CS_quit);
                 }
 
@@ -260,6 +261,9 @@ int user_main_thread(int port)
             break;
         }
 	}
+    
+	free(ioInfo);
+    free(send_ioInfo);
 	return 0;
 }
 
